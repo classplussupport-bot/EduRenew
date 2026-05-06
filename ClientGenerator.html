@@ -886,58 +886,48 @@ colLines,
   var adminUrl  = CENTRAL_ADMIN_URL;
   var studentUrl = CENTRAL_STUDENT_URL;
 
-  var shellHtml = `<!DOCTYPE html>
-<html>
-<head>
-  <base target="_top">
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width,initial-scale=1">
-  <style>
-    #_er_loader{position:fixed;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;background:#08090d;color:#7a7e9a;font-family:sans-serif;font-size:14px;gap:16px;z-index:9999}
-    #_er_loader svg{animation:_sp 1s linear infinite}
-    @keyframes _sp{to{transform:rotate(360deg)}}
-    #_er_err{display:none;color:#ef4444;font-size:13px;max-width:400px;text-align:center;line-height:1.6}
-  </style>
-</head>
-<body>
-<div id="_er_loader">
-  <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#5b6cf5" stroke-width="2"><circle cx="12" cy="12" r="10" stroke-opacity=".2"/><path d="M12 2a10 10 0 0 1 10 10"/></svg>
-  <span>Loading portal&hellip;</span>
-  <div id="_er_err"></div>
-</div>
-<script>
-  var _PAGE        = '<?= page ?>';
-  var _ADMIN_URL   = '` + adminUrl + `';
-  var _STUDENT_URL = '` + studentUrl + `';
-  var _url = (_PAGE === 'student') ? _STUDENT_URL : _ADMIN_URL;
-  fetch(_url)
-    .then(function(r){ if(!r.ok) throw new Error('HTTP '+r.status); return r.text(); })
-    .then(function(raw){
-      var hm = raw.match(/<head[^>]*>([\s\S]*?)<\/head>/i);
-      var bm = raw.match(/<body[^>]*>([\s\S]*?)<\/body>/i);
-      var headHtml = hm ? hm[1] : '';
-      var bodyHtml = bm ? bm[1] : raw;
-      var tmp = document.createElement('div');
-      tmp.innerHTML = headHtml;
-      Array.from(tmp.childNodes).forEach(function(n){
-        if(n.nodeName !== 'TITLE') document.head.appendChild(n.cloneNode(true));
-      });
-      document.body.innerHTML = bodyHtml;
-      Array.from(document.body.querySelectorAll('script')).forEach(function(s){
-        var ns = document.createElement('script');
-        if(s.src){ ns.src=s.src; } else { ns.textContent=s.textContent; }
-        s.parentNode.replaceChild(ns,s);
-      });
-    })
-    .catch(function(err){
-      document.querySelector('#_er_loader svg').style.display='none';
-      var el=document.getElementById('_er_err');
-      el.style.display='block';
-      el.textContent='Failed to load portal: '+err.message+'. Check CENTRAL_ADMIN_URL / CENTRAL_STUDENT_URL in Code.gs.';
-    });
-<\/script>
-</body>
-</html>`;
+  var shellHtml = [
+    '<!DOCTYPE html>',
+    '<html>',
+    '<head>',
+    '  <base target="_top">',
+    '  <meta charset="UTF-8">',
+    '  <meta name="viewport" content="width=device-width,initial-scale=1">',
+    '  <style>',
+    '    #_er_loader{position:fixed;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;background:#08090d;color:#7a7e9a;font-family:sans-serif;font-size:14px;gap:16px;z-index:9999}',
+    '    #_er_loader svg{animation:_sp 1s linear infinite}',
+    '    @keyframes _sp{to{transform:rotate(360deg)}}',
+    '    #_er_err{display:none;color:#ef4444;font-size:13px;max-width:400px;text-align:center;line-height:1.6}',
+    '  </style>',
+    '</head>',
+    '<body>',
+    '<div id="_er_loader">',
+    '  <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#5b6cf5" stroke-width="2"><circle cx="12" cy="12" r="10" stroke-opacity=".2"/><path d="M12 2a10 10 0 0 1 10 10"/></svg>',
+    '  <span>Loading portal...</span>',
+    '  <div id="_er_err"></div>',
+    '</div>',
+    '<script>',
+    '  var _PAGE        = \'<?= page ?>\';',
+    '  var _ADMIN_URL   = \'' + CENTRAL_ADMIN_URL + '\';',
+    '  var _STUDENT_URL = \'' + CENTRAL_STUDENT_URL + '\';',
+    '  var _url = (_PAGE === \'student\') ? _STUDENT_URL : _ADMIN_URL;',
+    '  fetch(_url)',
+    '    .then(function(r){ if(!r.ok) throw new Error(\'HTTP \'+r.status); return r.text(); })',
+    '    .then(function(html){',
+    '      document.open();',
+    '      document.write(html);',
+    '      document.close();',
+    '    })',
+    '    .catch(function(err){',
+    '      document.querySelector(\'#_er_loader svg\').style.display=\'none\';',
+    '      var el=document.getElementById(\'_er_err\');',
+    '      el.style.display=\'block\';',
+    '      el.textContent=\'Failed to load: \'+err.message;',
+    '    });',
+    '<\/script>',
+    '</body>',
+    '</html>'
+  ].join('\n');
 
   setTimeout(function(){
     btn.disabled=false;
