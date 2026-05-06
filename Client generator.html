@@ -255,6 +255,18 @@ body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellips
     <div class="code-area" id="codeOut"></div>
   </div>
 
+  <div class="output-card" style="margin-top:12px">
+    <div class="output-header">
+      <span class="output-title">Shell.html &#8212; add as a new HTML file named <strong style="color:#fff">Shell</strong></span>
+      <button class="copy-btn" id="copyShellBtn" onclick="copyShell()">Copy</button>
+    </div>
+    <div class="code-area" id="shellOut" style="max-height:120px"></div>
+  </div>
+  <div class="alert alert-info" style="margin-top:8px;margin-bottom:0">
+    <span>&#8505;</span>
+    <span><strong>Shell.html</strong> is required for <code style="font-family:var(--mono)">google.script.run</code> to work when HTML is fetched from GitHub. It must be added to every client&#39;s Apps Script as a file named exactly <code style="font-family:var(--mono)">Shell</code>.</span>
+  </div>
+
 <!-- ══════════════════════════════════════════════════════════
      PHASE 2 — ADD TO APPS SCRIPT & DEPLOY
 ══════════════════════════════════════════════════════════ -->
@@ -273,7 +285,7 @@ body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellips
       <li class="deploy-step"><div class="dst">Delete everything in <code>Code.gs</code> &#8594; paste the generated code above &#8594; <strong>Save (Ctrl+S)</strong></div></li>
       <li class="deploy-step"><div class="dst">Click <strong>+</strong> next to Files &#8594; <strong>HTML</strong> &#8594; name it exactly <code>Index</code> &#8594; paste <code>Index.html</code> from GitHub &#8594; Save</div></li>
       <li class="deploy-step"><div class="dst">Click <strong>+</strong> &#8594; <strong>HTML</strong> &#8594; name it exactly <code>Student_Demo</code> &#8594; paste <code>Student_Demo.html</code> from GitHub &#8594; Save</div></li>
-      <li class="deploy-step"><div class="dst">Click <strong>+</strong> &#8594; <strong>HTML</strong> &#8594; name it exactly <code>Shell</code> &#8594; paste the contents of <code>Shell.html</code> from GitHub &#8594; Save.<br><span style="font-size:12px;color:var(--text3)">Shell.html is a tiny wrapper (8 lines) that lets GitHub-hosted pages use <code>google.script.run</code>.</span></div></li>
+      <li class="deploy-step"><div class="dst">Click <strong>+</strong> &#8594; <strong>HTML</strong> &#8594; name it exactly <code>Shell</code> &#8594; paste the <strong>Shell.html</strong> content generated above &#8594; Save.<br><span style="font-size:12px;color:var(--text3)">This 8-line wrapper lets GitHub-hosted pages use <code>google.script.run</code>. It never needs to change.</span></div></li>
       <li class="deploy-step"><div class="dst">In the function dropdown select <code>setupSheets</code> &#8594; click <strong>Run</strong> &#8594; grant permissions when prompted.<br><span style="font-size:12px;color:var(--text3)">This creates all tabs, pulls initial Classplus data, and registers the hourly sync trigger automatically.</span></div></li>
       <li class="deploy-step"><div class="dst"><strong>Deploy &#8594; New deployment &#8594; Web App</strong><br>Execute as: <strong>Me</strong> &nbsp;|&nbsp; Who has access: <strong>Anyone</strong> &#8594; click <strong>Deploy</strong> &#8594; <strong>copy the Web App URL</strong></div></li>
     </ol>
@@ -893,8 +905,21 @@ colLines,
   var existingUrl = document.getElementById('webAppUrl').value.trim();
   if(existingUrl) onWebAppUrlInput(existingUrl);
 
+  var shellHtml = [
+'<!DOCTYPE html>',
+'<html>',
+'  <head>',
+'    <base target="_top">',
+'  </head>',
+'  <body>',
+'    <?!= BODY ?>',
+'  </body>',
+'</html>'
+  ].join('\n');
+
   setTimeout(function(){
     document.getElementById('codeOut').textContent=code;
+    document.getElementById('shellOut').textContent=shellHtml;
     document.getElementById('output').style.display='block';
     btn.disabled=false;
     btn.innerHTML='<svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="4 17 10 11 4 5"/><line x1="12" y1="19" x2="20" y2="19"/></svg> Generate Code.gs';
@@ -908,6 +933,15 @@ function copyCode(){
     var btn=document.getElementById('copyBtn');
     btn.textContent='Copied!';btn.className='copy-btn copied';
     setTimeout(function(){btn.textContent='Copy all';btn.className='copy-btn';},2500);
+  });
+}
+
+function copyShell(){
+  var text=document.getElementById('shellOut').textContent;
+  navigator.clipboard.writeText(text).then(function(){
+    var btn=document.getElementById('copyShellBtn');
+    btn.textContent='Copied!';btn.className='copy-btn copied';
+    setTimeout(function(){btn.textContent='Copy';btn.className='copy-btn';},2500);
   });
 }
 
