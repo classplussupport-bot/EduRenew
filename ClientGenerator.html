@@ -405,8 +405,8 @@ var SHEETS_API_KEY  = 'AIzaSyBhyvXDrSy7SUCehYkCQ00Mr2D4Uhhnnj8';
 // ── Central HTML URLs — hosted on GitHub, fetched by every client's doGet() ──
 // Update Index.html or Student_Demo.html on GitHub → all clients get the change instantly.
 // Replace these with your actual GitHub raw URLs once you push the files.
-var CENTRAL_ADMIN_URL   = 'https://raw.githubusercontent.com/classplussupport-bot/EduRenew/refs/heads/main/Index.html';
-var CENTRAL_STUDENT_URL = 'https://raw.githubusercontent.com/classplussupport-bot/EduRenew/refs/heads/main/Student_demo.html';
+var CENTRAL_ADMIN_URL   = 'https://raw.githubusercontent.com/YOUR_ORG/edurenew/main/Index.html';
+var CENTRAL_STUDENT_URL = 'https://raw.githubusercontent.com/YOUR_ORG/edurenew/main/Student_Demo.html';
 
 // ── Default column mappings (standard Classplus export headers) ──
 // These are baked into every generated Code.gs.
@@ -504,7 +504,7 @@ function generate(){
 '//',
 '//  FIRST RUN (one time only):',
 '//  1. Paste this as Code.gs in Apps Script',
-'//  2. Add Index.html + Student_Demo.html from the GitHub repo',
+'//  2. Add Shell.html as an HTML file named Shell',
 '//  3. Run setupSheets() from the editor',
 '//  4. Deploy > Web App > Execute as Me > Access Anyone',
 '// ============================================================',
@@ -552,7 +552,7 @@ colLines,
 '',
 'function doGet(e) {',
 "  var page = (e && e.parameter && e.parameter.page) || 'admin';",
-"  var title = page === 'student' ? CLIENT.orgName+' — Student Portal' : CLIENT.orgName+' — Admin';",
+"  var title = page === 'student' ? CLIENT.orgName+' - Student Portal' : CLIENT.orgName+' - Admin';",
 "  var tpl = HtmlService.createTemplateFromFile('Shell');",
 '  tpl.page = page;',
 '  return tpl.evaluate()',
@@ -1033,7 +1033,7 @@ colLines,
 '',
 'function doGet(e) {',
 "  var page = (e && e.parameter && e.parameter.page) || 'admin';",
-"  var title = page === 'student' ? CLIENT.orgName+' — Student Portal' : CLIENT.orgName+' — Admin';",
+"  var title = page === 'student' ? CLIENT.orgName+' - Student Portal' : CLIENT.orgName+' - Admin';",
 "  var tpl = HtmlService.createTemplateFromFile('Shell');",
 '  tpl.page = page;',
 '  return tpl.evaluate()',
