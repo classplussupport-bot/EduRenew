@@ -156,11 +156,7 @@ body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellips
       <input class="form-input" id="orgName" placeholder="e.g. Wisdom Nursing Classes">
       <div class="form-hint">Display name shown in admin and student portal header</div>
     </div>
-    <div class="form-group">
-      <label class="form-label">Logo emoji</label>
-      <input class="form-input" id="logoEmoji" placeholder="📚" maxlength="4" value="📚">
-      <div class="form-hint">One emoji shown as the logo in both portals</div>
-    </div>
+
     <div class="form-group">
       <label class="form-label">Brand colour</label>
       <div class="color-row">
@@ -472,7 +468,6 @@ function generate(){
   var sheetId=document.getElementById('sheetId').value.trim();
   var txnTab =document.getElementById('txnTab').value.trim()||'Transactions';
   var color  =document.getElementById('colorHex').value.trim()||'#f5a623';
-  var emoji  =document.getElementById('logoEmoji').value.trim()||'📚';
   var queryId=document.getElementById('queryId').value.trim();
   var apiKey =document.getElementById('apiKey').value.trim();
   var idxT   = 5;   // Col F — TransDate (hardcoded default)
@@ -515,7 +510,6 @@ function generate(){
 "  sheetId:        '"+sheetId+"',",
 "  txnTab:         '"+txnTab+"',",
 "  primaryColor:   '"+color+"',",
-"  logoEmoji:      '"+emoji+"',",
 '  renewWindowPre: 15,',
 '  renewWindowPost: 15,',
 '',
@@ -565,7 +559,6 @@ colLines,
 "    orgId:          CLIENT.orgId,",
 "    name:           CLIENT.orgName,",
 '    primaryColor:   CLIENT.primaryColor,',
-'    logoEmoji:      CLIENT.logoEmoji,',
 '    renewWindowPre: CLIENT.renewWindowPre,',
 '    renewWindowPost: CLIENT.renewWindowPost',
 '  };',
@@ -877,7 +870,7 @@ colLines,
   var code = lines.join('\n');
 
   // Store for saveClient()
-  window._genData = { orgId:orgId, orgName:orgName, sheetId:sheetId, queryId:queryId, color:color, emoji:emoji };
+  window._genData = { orgId:orgId, orgName:orgName, sheetId:sheetId, queryId:queryId, color:color };
 
   // Re-trigger URL preview if already filled
   var existingUrl = document.getElementById('webAppUrl').value.trim();
@@ -943,7 +936,6 @@ function generate(){
   var sheetId=document.getElementById('sheetId').value.trim();
   var txnTab =document.getElementById('txnTab').value.trim()||'Transactions';
   var color  =document.getElementById('colorHex').value.trim()||'#f5a623';
-  var emoji  =document.getElementById('logoEmoji').value.trim()||'📚';
   var queryId=document.getElementById('queryId').value.trim();
   var apiKey =document.getElementById('apiKey').value.trim();
   var idxT   = 5;   // Col F — TransDate (hardcoded default)
@@ -986,7 +978,6 @@ function generate(){
 "  sheetId:        '"+sheetId+"',",
 "  txnTab:         '"+txnTab+"',",
 "  primaryColor:   '"+color+"',",
-"  logoEmoji:      '"+emoji+"',",
 '  renewWindowPre: 15,',
 '  renewWindowPost: 15,',
 '',
@@ -1036,7 +1027,6 @@ colLines,
 "    orgId:          CLIENT.orgId,",
 "    name:           CLIENT.orgName,",
 '    primaryColor:   CLIENT.primaryColor,',
-'    logoEmoji:      CLIENT.logoEmoji,',
 '    renewWindowPre: CLIENT.renewWindowPre,',
 '    renewWindowPost: CLIENT.renewWindowPost',
 '  };',
@@ -1348,7 +1338,7 @@ colLines,
   var code = lines.join('\n');
 
   // Store for saveClient()
-  window._genData = { orgId:orgId, orgName:orgName, sheetId:sheetId, queryId:queryId, color:color, emoji:emoji };
+  window._genData = { orgId:orgId, orgName:orgName, sheetId:sheetId, queryId:queryId, color:color };
 
   // Re-trigger URL preview if already filled
   var existingUrl = document.getElementById('webAppUrl').value.trim();
@@ -1490,7 +1480,7 @@ function saveClient(){
   var base=webAppUrl.replace(/[?#].*/,'').replace(/\/+$/,'');
   var adminUrl=base+'/exec', studentUrl=base+'/exec?page=student';
   var date=new Date().toISOString().slice(0,10);
-  var row=[date,d.orgId,d.orgName,d.sheetId,d.queryId,d.color,d.emoji,adminUrl,studentUrl,''];
+  var row=[date,d.orgId,d.orgName,d.sheetId,d.queryId,d.color,'',adminUrl,studentUrl,''];
 
   var apiUrl='https://sheets.googleapis.com/v4/spreadsheets/'+encodeURIComponent(masterSheetId)
     +'/values/Clients!A1:append?valueInputOption=USER_ENTERED&insertDataOption=INSERT_ROWS&key='+encodeURIComponent(sheetsApiKey);
@@ -1503,13 +1493,13 @@ function saveClient(){
   .then(function(){
     document.getElementById('saveClientBtn').disabled=false;
     // Save to local log too
-    addToLocalLog({date:date,orgId:d.orgId,orgName:d.orgName,sheetId:d.sheetId,queryId:d.queryId,color:d.color,emoji:d.emoji,adminUrl:adminUrl,studentUrl:studentUrl,notes:''});
+    addToLocalLog({date:date,orgId:d.orgId,orgName:d.orgName,sheetId:d.sheetId,queryId:d.queryId,color:d.color,adminUrl:adminUrl,studentUrl:studentUrl,notes:''});
     setMasterStatus('ok','&#10003; Saved to master sheet! Switch to <strong>Client Log</strong> tab to view all clients.');
   })
   .catch(function(e){
     document.getElementById('saveClientBtn').disabled=false;
     // Save locally even if sheet fails
-    addToLocalLog({date:date,orgId:d.orgId,orgName:d.orgName,sheetId:d.sheetId,queryId:d.queryId,color:d.color,emoji:d.emoji,adminUrl:adminUrl,studentUrl:studentUrl,notes:''});
+    addToLocalLog({date:date,orgId:d.orgId,orgName:d.orgName,sheetId:d.sheetId,queryId:d.queryId,color:d.color,adminUrl:adminUrl,studentUrl:studentUrl,notes:''});
     setMasterStatus('err','Sheet save failed ('+e.message+') — saved to local log only. Check Sheet ID, API key, and that "Clients" tab exists.');
   });
 }
@@ -1605,9 +1595,9 @@ function pullFromSheet(){
   .then(function(data){
     document.getElementById('pullBtn').disabled=false;
     var rows=(data.values||[]);
-    // Map sheet rows [date,orgId,orgName,sheetId,queryId,color,emoji,adminUrl,studentUrl,notes] to objects
+    // Map sheet rows [date,orgId,orgName,sheetId,queryId,color,adminUrl,studentUrl,notes] to objects
     _sheetData=rows.map(function(r){
-      return {date:r[0]||'',orgId:r[1]||'',orgName:r[2]||'',sheetId:r[3]||'',queryId:r[4]||'',color:r[5]||'',emoji:r[6]||'',adminUrl:r[7]||'',studentUrl:r[8]||'',notes:r[9]||''};
+      return {date:r[0]||'',orgId:r[1]||'',orgName:r[2]||'',sheetId:r[3]||'',queryId:r[4]||'',color:r[5]||'',adminUrl:r[7]||'',studentUrl:r[8]||'',notes:r[9]||''};
     });
     // Merge into local cache
     _sheetData.forEach(function(e){ addToLocalLog(e); });
