@@ -1,0 +1,794 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Admin Panel</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=JetBrains+Mono:wght@400;500&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;1,9..40,400&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#090b0f;--s1:#0e1117;--s2:#141820;--border:#1c2230;--border2:#243040;
+  --text:#dde2ec;--text2:#8892a4;--text3:#4a5568;
+  --accent:#f5a623;--accent2:#e8912a;
+  --green:#22c55e;--red:#ef4444;--blue:#3b82f6;
+  --r:12px;--r-sm:8px;
+  --mono:'JetBrains Mono',monospace;--sans:'DM Sans',sans-serif;--display:'Syne',sans-serif;
+}
+body{font-family:var(--sans);background:var(--bg);color:var(--text);min-height:100vh;display:flex;font-size:14px;line-height:1.6}
+body::before{content:'';position:fixed;inset:0;background-image:linear-gradient(rgba(245,166,35,.025) 1px,transparent 1px),linear-gradient(90deg,rgba(245,166,35,.025) 1px,transparent 1px);background-size:40px 40px;pointer-events:none;z-index:0}
+
+/* SIDEBAR */
+.sidebar{width:210px;min-height:100vh;background:var(--s1);border-right:1px solid var(--border);display:flex;flex-direction:column;position:fixed;top:0;left:0;z-index:100}
+.logo{padding:24px 18px 20px;border-bottom:1px solid var(--border)}
+.logo-name{font-family:var(--display);font-size:15px;font-weight:700;color:var(--text);line-height:1.2;margin-top:8px}
+.logo-sub{font-family:var(--mono);font-size:9px;color:var(--text3);letter-spacing:1px;text-transform:uppercase;margin-top:3px}
+.logo-emoji{font-size:28px;line-height:1}
+.nav{padding:14px 10px;flex:1}
+.nav-group{font-family:var(--mono);font-size:9px;color:var(--text3);letter-spacing:1.5px;text-transform:uppercase;padding:10px 8px 5px;margin-top:6px}
+.nav-item{display:flex;align-items:center;gap:9px;padding:9px 10px;border-radius:var(--r-sm);cursor:pointer;color:var(--text2);font-size:13px;transition:all .15s;margin-bottom:2px;position:relative;border:1px solid transparent}
+.nav-item:hover{background:var(--s2);color:var(--text)}
+.nav-item.active{background:rgba(245,166,35,.1);color:var(--accent);border-color:rgba(245,166,35,.15)}
+.nav-item.active::before{content:'';position:absolute;left:-1px;top:20%;height:60%;width:2px;background:var(--accent);border-radius:2px}
+.nav-icon{width:15px;height:15px;flex-shrink:0;opacity:.75}
+.nav-item.active .nav-icon{opacity:1}
+.sidebar-foot{padding:14px 18px;border-top:1px solid var(--border);font-family:var(--mono);font-size:10px;color:var(--text3)}
+
+/* MAIN */
+.main{margin-left:210px;flex:1;padding:28px 32px;position:relative;z-index:1;max-width:calc(100vw - 210px)}
+.page{display:none;animation:fadeIn .2s ease}
+.page.active{display:block}
+@keyframes fadeIn{from{opacity:0;transform:translateY(5px)}to{opacity:1;transform:none}}
+
+/* PAGE HEADER */
+.ph{display:flex;align-items:flex-start;justify-content:space-between;gap:16px;margin-bottom:26px}
+.ph-title{font-family:var(--display);font-size:24px;font-weight:700;letter-spacing:-.3px;color:var(--text)}
+.ph-sub{font-size:12px;color:var(--text3);margin-top:3px;font-family:var(--mono)}
+
+/* CARDS */
+.card{background:var(--s1);border:1px solid var(--border);border-radius:var(--r);padding:22px;margin-bottom:18px}
+.card-title{font-family:var(--display);font-size:13px;font-weight:600;color:var(--text);margin-bottom:14px;display:flex;align-items:center;gap:7px}
+.card-title::before{content:'';width:5px;height:5px;border-radius:50%;background:var(--accent);flex-shrink:0}
+
+/* STATS */
+.stat-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:20px}
+.stat{background:var(--s1);border:1px solid var(--border);border-radius:var(--r);padding:18px;transition:border-color .2s}
+.stat:hover{border-color:var(--border2)}
+.stat-label{font-family:var(--mono);font-size:9px;letter-spacing:1px;text-transform:uppercase;color:var(--text3);margin-bottom:8px}
+.stat-val{font-family:var(--display);font-size:26px;font-weight:700;letter-spacing:-1px;color:var(--text)}
+.stat-val.amber{color:var(--accent)}
+.stat-val.green{color:var(--green)}
+.stat-val.red{color:var(--red)}
+.stat-val.blue{color:var(--blue)}
+.stat-sub{font-size:11px;color:var(--text3);margin-top:5px}
+
+/* FORMS */
+.form-group{margin-bottom:14px}
+.form-label{font-family:var(--mono);font-size:9px;letter-spacing:1px;text-transform:uppercase;color:var(--text2);display:block;margin-bottom:5px}
+.form-input,.form-select,.form-textarea{width:100%;background:var(--bg);border:1px solid var(--border);border-radius:var(--r-sm);padding:9px 12px;color:var(--text);font-family:var(--sans);font-size:13px;outline:none;transition:border-color .15s}
+.form-input::placeholder{color:var(--text3)}
+.form-input:focus,.form-select:focus{border-color:var(--accent);box-shadow:0 0 0 3px rgba(245,166,35,.08)}
+.form-select{cursor:pointer;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%234a5568' stroke-width='2'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 10px center;padding-right:30px;appearance:none}
+.form-textarea{resize:vertical;min-height:70px}
+.form-row{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.form-row-3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px}
+
+/* BUTTONS */
+.btn{display:inline-flex;align-items:center;gap:6px;padding:9px 16px;border-radius:var(--r-sm);font-family:var(--sans);font-size:13px;font-weight:500;cursor:pointer;border:none;transition:all .15s;white-space:nowrap}
+.btn:disabled{opacity:.4;cursor:not-allowed}
+.btn-primary{background:var(--accent);color:#080a0d;font-weight:600}
+.btn-primary:hover:not(:disabled){background:var(--accent2);transform:translateY(-1px)}
+.btn-secondary{background:var(--s2);color:var(--text);border:1px solid var(--border)}
+.btn-secondary:hover:not(:disabled){border-color:var(--border2)}
+.btn-ghost{background:transparent;color:var(--text2);border:1px solid var(--border)}
+.btn-ghost:hover:not(:disabled){color:var(--text);border-color:var(--border2)}
+.btn-danger{background:rgba(239,68,68,.1);color:var(--red);border:1px solid rgba(239,68,68,.2)}
+.btn-success{background:rgba(34,197,94,.1);color:var(--green);border:1px solid rgba(34,197,94,.2)}
+.btn-sm{padding:5px 11px;font-size:11px}
+.btn-lg{padding:11px 22px;font-size:14px}
+.btn-full{width:100%;justify-content:center}
+
+/* BADGES */
+.badge{display:inline-flex;align-items:center;padding:2px 8px;border-radius:20px;font-family:var(--mono);font-size:9px;font-weight:500;letter-spacing:.5px;text-transform:uppercase}
+.badge-green{background:rgba(34,197,94,.1);color:var(--green);border:1px solid rgba(34,197,94,.2)}
+.badge-red{background:rgba(239,68,68,.1);color:var(--red);border:1px solid rgba(239,68,68,.2)}
+.badge-amber{background:rgba(245,166,35,.1);color:var(--accent);border:1px solid rgba(245,166,35,.2)}
+.badge-muted{background:var(--s2);color:var(--text3);border:1px solid var(--border)}
+
+/* ALERTS */
+.alert{padding:10px 14px;border-radius:var(--r-sm);font-size:12px;display:flex;align-items:flex-start;gap:8px;margin-bottom:14px}
+.alert-success{background:rgba(34,197,94,.07);border:1px solid rgba(34,197,94,.2);color:#86efac}
+.alert-error{background:rgba(239,68,68,.07);border:1px solid rgba(239,68,68,.2);color:#fca5a5}
+.alert-info{background:rgba(59,130,246,.07);border:1px solid rgba(59,130,246,.2);color:#93c5fd}
+
+/* TABLE */
+.table-wrap{overflow-x:auto}
+table{width:100%;border-collapse:collapse;font-size:12px}
+thead tr{border-bottom:1px solid var(--border)}
+th{font-family:var(--mono);font-size:9px;letter-spacing:1px;text-transform:uppercase;color:var(--text3);padding:8px 12px;text-align:left;white-space:nowrap;font-weight:500}
+td{padding:10px 12px;border-bottom:1px solid var(--border);color:var(--text2);vertical-align:middle}
+td strong{color:var(--text)}
+tbody tr:hover td{background:var(--s2)}
+tbody tr:last-child td{border-bottom:none}
+
+/* COURSE CARDS */
+.course-cards{display:flex;flex-direction:column;gap:10px}
+.course-card{background:var(--s2);border:1px solid var(--border);border-radius:var(--r);padding:16px;cursor:pointer;transition:all .2s;position:relative}
+.course-card:hover{border-color:var(--border2);transform:translateY(-1px)}
+.course-card.selected{border-color:var(--accent);background:rgba(245,166,35,.04)}
+.course-name{font-family:var(--display);font-size:13px;font-weight:600;color:var(--text)}
+.course-meta{display:flex;gap:14px;flex-wrap:wrap;margin-top:7px}
+.course-meta-item{font-family:var(--mono);font-size:10px;color:var(--text2)}
+.course-meta-item strong{color:var(--text)}
+
+/* SEARCH */
+.search-hero{background:linear-gradient(135deg,var(--s1),rgba(245,166,35,.03));border:1px solid var(--border);border-radius:var(--r);padding:28px;text-align:center;margin-bottom:20px}
+.search-row{display:flex;gap:10px;max-width:420px;margin:0 auto}
+.search-row .form-input{flex:1;font-family:var(--mono);font-size:15px;letter-spacing:2px}
+
+/* COUPON PREVIEW */
+.cp-preview{background:rgba(245,166,35,.05);border:1px solid rgba(245,166,35,.15);border-radius:var(--r-sm);padding:12px 16px;margin-bottom:14px;font-size:13px}
+
+/* PRICING */
+.pricing-box{background:var(--bg);border:1px solid var(--border);border-radius:var(--r);overflow:hidden}
+.price-row{display:flex;justify-content:space-between;align-items:center;padding:10px 14px;border-bottom:1px solid var(--border);font-size:12px}
+.price-row:last-child{border-bottom:none;background:rgba(245,166,35,.04);font-weight:600}
+.price-label{color:var(--text2)}
+.price-val{color:var(--text);font-family:var(--mono)}
+.price-val.green{color:var(--green)}
+.price-val.big{font-family:var(--display);font-size:16px;color:var(--accent)}
+
+/* SPINNER */
+.spinner{width:16px;height:16px;border:2px solid rgba(245,166,35,.2);border-top-color:var(--accent);border-radius:50%;animation:spin .6s linear infinite;flex-shrink:0}
+@keyframes spin{to{transform:rotate(360deg)}}
+.loading-overlay{position:fixed;inset:0;background:rgba(9,11,15,.8);backdrop-filter:blur(4px);display:flex;align-items:center;justify-content:center;z-index:1000;opacity:0;pointer-events:none;transition:opacity .2s}
+.loading-overlay.on{opacity:1;pointer-events:all}
+.loading-box{background:var(--s1);border:1px solid var(--border);border-radius:var(--r);padding:28px 44px;display:flex;flex-direction:column;align-items:center;gap:14px}
+.loading-box .spinner{width:28px;height:28px;border-width:3px}
+.loading-text{font-family:var(--mono);font-size:11px;color:var(--text2);letter-spacing:1px}
+
+/* MODAL */
+.modal-overlay{position:fixed;inset:0;background:rgba(9,11,15,.88);backdrop-filter:blur(6px);display:flex;align-items:center;justify-content:center;z-index:200;opacity:0;pointer-events:none;transition:opacity .2s}
+.modal-overlay.on{opacity:1;pointer-events:all}
+.modal{background:var(--s1);border:1px solid var(--border);border-radius:16px;padding:36px;max-width:460px;width:90%;text-align:center;transform:scale(.95);transition:transform .2s}
+.modal-overlay.on .modal{transform:scale(1)}
+.modal-icon{width:56px;height:56px;border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 16px;font-size:24px;background:rgba(34,197,94,.1);border:1px solid rgba(34,197,94,.2)}
+.modal-title{font-family:var(--display);font-size:20px;font-weight:700;color:var(--text);margin-bottom:6px}
+.modal-sub{font-size:12px;color:var(--text2);margin-bottom:20px;line-height:1.7}
+.modal-txn{font-family:var(--mono);font-size:10px;color:var(--accent);background:rgba(245,166,35,.06);border:1px solid rgba(245,166,35,.12);border-radius:var(--r-sm);padding:8px 14px;margin-bottom:20px}
+
+/* DIVIDER */
+.divider{height:1px;background:var(--border);margin:18px 0}
+
+/* EMPTY */
+.empty{text-align:center;padding:44px 24px;color:var(--text2)}
+.empty-icon{font-size:36px;margin-bottom:10px;opacity:.35}
+.empty-title{font-family:var(--display);font-size:14px;font-weight:600;color:var(--text);margin-bottom:4px}
+.empty-sub{font-size:12px;color:var(--text3)}
+
+/* RESPONSIVE */
+@media(max-width:900px){.stat-grid{grid-template-columns:1fr 1fr}.form-row,.form-row-3{grid-template-columns:1fr}.sidebar{width:52px}.sidebar .logo-name,.sidebar .logo-sub,.nav-item span,.nav-group,.sidebar-foot{display:none}.main{margin-left:52px;max-width:calc(100vw - 52px);padding:16px}.nav-item{justify-content:center}.logo{padding:16px;text-align:center}}
+</style>
+</head>
+<body>
+
+<div class="loading-overlay" id="loadingOverlay">
+  <div class="loading-box">
+    <div class="spinner"></div>
+    <div class="loading-text" id="loadingText">LOADING...</div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="successModal">
+  <div class="modal">
+    <div class="modal-icon">✓</div>
+    <div class="modal-title" id="modalTitle">Done!</div>
+    <div class="modal-sub" id="modalSub"></div>
+    <div class="modal-txn" id="modalTxn"></div>
+    <button class="btn btn-primary btn-full" onclick="closeModal()">Close</button>
+  </div>
+</div>
+
+<aside class="sidebar">
+  <div class="logo">
+    <div class="logo-emoji" id="sideLogoEmoji">📚</div>
+    <div class="logo-name" id="sideClientName">Loading...</div>
+    <div class="logo-sub">Admin Panel</div>
+  </div>
+  <nav class="nav">
+    <div class="nav-group">Main</div>
+    <div class="nav-item active" onclick="nav('dashboard',this)">
+      <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
+      <span>Dashboard</span>
+    </div>
+    <div class="nav-item" onclick="nav('renewal',this)">
+      <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 2v6h-6"/><path d="M3 12a9 9 0 0 1 15-6.7L21 8"/><path d="M3 22v-6h6"/><path d="M21 12a9 9 0 0 1-15 6.7L3 16"/></svg>
+      <span>New Renewal</span>
+    </div>
+    <div class="nav-item" onclick="nav('history',this)">
+      <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 8v4l3 3"/><circle cx="12" cy="12" r="9"/></svg>
+      <span>History</span>
+    </div>
+    <div class="nav-group">Settings</div>
+    <div class="nav-item" onclick="nav('coupons',this)">
+      <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 5H7a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-2"/><rect x="9" y="3" width="6" height="4" rx="1"/><path d="M9 12h6M9 16h4"/></svg>
+      <span>Coupons</span>
+    </div>
+    <div class="nav-item" onclick="nav('setup',this)">
+      <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.07 4.93a10 10 0 0 1 1.41 12.95L18 15m-1.41 3.54A10 10 0 0 1 4.93 4.93L8 7"/></svg>
+      <span>Setup</span>
+    </div>
+  </nav>
+  <div class="sidebar-foot">v2.0</div>
+</aside>
+
+<main class="main">
+
+  <!-- DASHBOARD -->
+  <div class="page active" id="page-dashboard">
+    <div class="ph">
+      <div><div class="ph-title">Dashboard</div><div class="ph-sub" id="dashClientName">Loading...</div></div>
+      <button class="btn btn-secondary" onclick="loadDashboard()">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 2v6h-6"/><path d="M3 12a9 9 0 0 1 15-6.7L21 8"/></svg>
+        Refresh
+      </button>
+    </div>
+    <div class="stat-grid">
+      <div class="stat"><div class="stat-label">Total Txns</div><div class="stat-val amber" id="st-total">—</div><div class="stat-sub">All records</div></div>
+      <div class="stat"><div class="stat-label">Revenue</div><div class="stat-val green" id="st-rev">—</div><div class="stat-sub">Total collected</div></div>
+      <div class="stat"><div class="stat-label">Expired</div><div class="stat-val red" id="st-exp">—</div><div class="stat-sub">Past expiry</div></div>
+      <div class="stat"><div class="stat-label">Expiring soon</div><div class="stat-val blue" id="st-exp15">—</div><div class="stat-sub">Within 15 days</div></div>
+    </div>
+    <div class="card">
+      <div class="card-title">Quick actions</div>
+      <div style="display:flex;gap:10px;flex-wrap:wrap">
+        <button class="btn btn-primary" onclick="nav('renewal',document.querySelector('[onclick*=renewal]'))">Process Renewal</button>
+        <button class="btn btn-secondary" onclick="nav('coupons',document.querySelector('[onclick*=coupons]'))">Manage Coupons</button>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-title">Activity</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px">
+        <div><div style="font-family:var(--mono);font-size:9px;color:var(--text3);letter-spacing:1px;text-transform:uppercase;margin-bottom:4px">Renewals</div><div style="font-family:var(--display);font-size:22px;font-weight:700;color:var(--text)" id="st-ren">—</div></div>
+        <div><div style="font-family:var(--mono);font-size:9px;color:var(--text3);letter-spacing:1px;text-transform:uppercase;margin-bottom:4px">Log entries</div><div style="font-family:var(--display);font-size:22px;font-weight:700;color:var(--text)" id="st-logs">—</div></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- NEW RENEWAL -->
+  <div class="page" id="page-renewal">
+    <div class="ph"><div><div class="ph-title">New Renewal</div><div class="ph-sub">Search student → select course → process</div></div></div>
+
+    <div id="step-search">
+      <div class="search-hero">
+        <div style="font-family:var(--display);font-size:18px;font-weight:700;margin-bottom:5px">Find Student</div>
+        <div style="font-size:12px;color:var(--text2);margin-bottom:20px">Enter 10-digit mobile number</div>
+        <div class="search-row">
+          <input type="tel" class="form-input" id="searchPhone" placeholder="9876543210" maxlength="10" oninput="this.value=this.value.replace(/\D/g,'')" onkeydown="if(event.key==='Enter')doSearch()">
+          <button class="btn btn-primary btn-lg" id="searchBtn" onclick="doSearch()">Search</button>
+        </div>
+        <div id="searchErr" style="margin-top:10px"></div>
+      </div>
+    </div>
+
+    <div id="step-results" style="display:none">
+      <div class="card" id="customerCard"></div>
+      <div class="card">
+        <div class="card-title">Enrolled courses</div>
+        <div class="course-cards" id="courseList"></div>
+      </div>
+      <div style="display:flex;gap:10px;margin-bottom:18px">
+        <button class="btn btn-ghost" onclick="resetSearch()">← Search again</button>
+        <button class="btn btn-primary" id="proceedBtn" disabled onclick="showForm()">Continue →</button>
+      </div>
+    </div>
+
+    <div id="step-form" style="display:none">
+      <div class="card" id="formCustomerCard"></div>
+      <div class="card">
+        <div class="card-title">Renewal details</div>
+        <div class="form-row">
+          <div class="form-group"><label class="form-label">Type</label>
+            <select class="form-select" id="entryType" onchange="calcPricing()">
+              <option value="RENEWAL">Renewal</option>
+              <option value="EXTENSION">Extension</option>
+            </select>
+          </div>
+          <div class="form-group"><label class="form-label">Course</label>
+            <input class="form-input" id="fCourse" readonly style="opacity:.6;cursor:default">
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group"><label class="form-label">Current expiry</label>
+            <input class="form-input" id="fExpiry" readonly style="opacity:.6;cursor:default">
+          </div>
+          <div class="form-group"><label class="form-label">New expiry date *</label>
+            <input type="date" class="form-input" id="newExpiry" onchange="calcPricing()">
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group"><label class="form-label">Amount (Rs) *</label>
+            <input type="number" class="form-input" id="fAmount" placeholder="e.g. 2999" oninput="calcPricing()">
+          </div>
+          <div class="form-group"><label class="form-label">Processed by</label>
+            <input type="email" class="form-input" id="fProcessor" placeholder="agent@org.co">
+          </div>
+        </div>
+        <div class="divider"></div>
+        <div class="form-group">
+          <label class="form-label">Coupon code (optional)</label>
+          <div style="display:flex;gap:8px">
+            <input type="text" class="form-input" id="fCoupon" placeholder="RENEW20" style="text-transform:uppercase;font-family:var(--mono);letter-spacing:1px" oninput="this.value=this.value.toUpperCase()">
+            <button class="btn btn-secondary" onclick="applyCoupon()">Apply</button>
+            <button class="btn btn-ghost" id="removeCouponBtn" style="display:none" onclick="removeCoupon()">Remove</button>
+          </div>
+          <div id="couponResult"></div>
+        </div>
+        <div class="divider"></div>
+        <div class="pricing-box" id="pricingBox">
+          <div class="price-row"><span class="price-label">Amount</span><span class="price-val" id="pOrig">Rs 0</span></div>
+          <div class="price-row" id="pDiscRow" style="display:none"><span class="price-label">Discount</span><span class="price-val green" id="pDisc">-Rs 0</span></div>
+          <div class="price-row"><span class="price-label" style="color:var(--text);font-weight:600">Total payable</span><span class="price-val big" id="pFinal">Rs 0</span></div>
+        </div>
+        <div class="divider"></div>
+        <div class="form-group"><label class="form-label">Notes</label>
+          <textarea class="form-textarea" id="fNotes" placeholder="Any notes..."></textarea>
+        </div>
+        <div id="formErr"></div>
+        <div style="display:flex;gap:10px;margin-top:4px">
+          <button class="btn btn-ghost" onclick="backToResults()">← Back</button>
+          <button class="btn btn-primary btn-lg" id="submitBtn" onclick="submitRenewal()">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+            Process Renewal
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- HISTORY -->
+  <div class="page" id="page-history">
+    <div class="ph"><div><div class="ph-title">Renewal History</div><div class="ph-sub">Lookup by mobile number</div></div></div>
+    <div class="card">
+      <div class="card-title">Search history</div>
+      <div style="display:flex;gap:10px;max-width:380px">
+        <input type="tel" class="form-input" id="histPhone" placeholder="Mobile number" maxlength="10" oninput="this.value=this.value.replace(/\D/g,'')" onkeydown="if(event.key==='Enter')loadHistory()">
+        <button class="btn btn-primary" onclick="loadHistory()">Search</button>
+      </div>
+    </div>
+    <div id="histResults">
+      <div class="empty"><div class="empty-icon">📋</div><div class="empty-title">No search yet</div><div class="empty-sub">Enter a phone number above</div></div>
+    </div>
+  </div>
+
+  <!-- COUPONS -->
+  <div class="page" id="page-coupons">
+    <div class="ph">
+      <div><div class="ph-title">Coupon Management</div><div class="ph-sub">Create monthly coupons for students in the renewal window</div></div>
+      <button class="btn btn-secondary" onclick="loadCoupons()">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 2v6h-6"/><path d="M3 12a9 9 0 0 1 15-6.7L21 8"/></svg>
+        Refresh
+      </button>
+    </div>
+    <div class="card">
+      <div class="card-title">Create monthly coupon</div>
+      <p style="font-size:12px;color:var(--text2);margin-bottom:18px;line-height:1.7">Students within 15 days of expiry (before or after) will see this coupon on their portal. Clicking <strong style="color:var(--text)">Renew Now</strong> opens the course purchase page with the coupon auto-applied.</p>
+      <div class="form-row">
+        <div class="form-group"><label class="form-label">Coupon code *</label>
+          <input type="text" class="form-input" id="cp_code" placeholder="e.g. JUN2025" style="text-transform:uppercase;font-family:var(--mono);letter-spacing:1px" oninput="this.value=this.value.toUpperCase().replace(/[^A-Z0-9]/g,'');cpPreview()">
+        </div>
+        <div class="form-group"><label class="form-label">Discount type *</label>
+          <select class="form-select" id="cp_type" onchange="cpPreview()">
+            <option value="PERCENT">Percentage (%)</option>
+            <option value="FLAT">Flat amount (Rs)</option>
+          </select>
+        </div>
+      </div>
+      <div class="form-row-3">
+        <div class="form-group"><label class="form-label">Discount value *</label>
+          <input type="number" class="form-input" id="cp_val" placeholder="e.g. 20" min="1" oninput="cpPreview()">
+        </div>
+        <div class="form-group"><label class="form-label">Max discount (Rs)</label>
+          <input type="number" class="form-input" id="cp_max" placeholder="blank = unlimited" min="0">
+        </div>
+        <div class="form-group"><label class="form-label">Min order (Rs)</label>
+          <input type="number" class="form-input" id="cp_min" placeholder="0 = none" min="0">
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group"><label class="form-label">Validity</label>
+          <select class="form-select" id="cp_days">
+            <option value="31">1 month (31 days)</option>
+            <option value="15">15 days</option>
+            <option value="45">45 days</option>
+            <option value="60">2 months</option>
+          </select>
+        </div>
+        <div class="form-group"><label class="form-label">Notes</label>
+          <input type="text" class="form-input" id="cp_notes" placeholder="e.g. June renewal offer">
+        </div>
+      </div>
+      <div id="cpPreviewBox" style="display:none" class="cp-preview">
+        <span style="font-family:var(--mono);font-size:9px;color:var(--text3);letter-spacing:1px;text-transform:uppercase">Preview</span><br>
+        <span id="cpPreviewText" style="color:var(--accent);font-weight:600;font-size:14px"></span>
+      </div>
+      <div id="cpResult" style="margin-bottom:10px"></div>
+      <button class="btn btn-primary btn-lg" onclick="createCoupon()">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 5v14M5 12h14"/></svg>
+        Create Coupon
+      </button>
+    </div>
+
+    <div class="card" style="padding:0;overflow:hidden">
+      <div style="padding:18px 22px 14px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between">
+        <div class="card-title" style="margin:0">All coupons</div>
+        <span id="cpCount" style="font-family:var(--mono);font-size:10px;color:var(--text3)"></span>
+      </div>
+      <div id="cpTable" class="table-wrap">
+        <div class="empty"><div class="empty-icon">🏷️</div><div class="empty-title">Click Refresh to load</div></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SETUP -->
+  <div class="page" id="page-setup">
+    <div class="ph"><div><div class="ph-title">Setup</div><div class="ph-sub">Initialise system tabs and verify configuration</div></div></div>
+    <div class="card">
+      <div class="card-title">One-click setup</div>
+      <p style="font-size:12px;color:var(--text2);margin-bottom:16px;line-height:1.7">Creates <strong style="color:var(--text)">RenewalLogs</strong>, <strong style="color:var(--text)">CouponConfig</strong>, <strong style="color:var(--text)">StudentPINs</strong>, and <strong style="color:var(--text)">ErrorLogs</strong> tabs. Safe to run multiple times.</p>
+      <button class="btn btn-primary btn-lg" id="setupBtn" onclick="runSetup()">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20h9"/><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg>
+        Initialize System
+      </button>
+      <div id="setupResult" style="margin-top:14px"></div>
+    </div>
+  </div>
+
+</main>
+
+<script>
+// ── State ─────────────────────────────────────────────────────
+var state = { search: null, selected: null, coupon: null, cfg: {} };
+
+// ── Boot ──────────────────────────────────────────────────────
+window.onload = function() {
+  google.script.run
+    .withSuccessHandler(function(cfg) {
+      state.cfg = cfg || {};
+      var c = cfg.primaryColor || '#f5a623';
+      document.documentElement.style.setProperty('--accent', c);
+      document.documentElement.style.setProperty('--accent2', c);
+      document.getElementById('sideLogoEmoji').textContent  = cfg.logoEmoji  || '📚';
+      document.getElementById('sideClientName').textContent = cfg.name || 'Admin Panel';
+      document.getElementById('dashClientName').textContent = cfg.name || '';
+      loadDashboard();
+    })
+    .withFailureHandler(function(){ loadDashboard(); })
+    .getClientConfig();
+};
+
+// ── Navigation ────────────────────────────────────────────────
+function nav(page, el) {
+  document.querySelectorAll('.page').forEach(function(p){ p.classList.remove('active'); });
+  document.querySelectorAll('.nav-item').forEach(function(n){ n.classList.remove('active'); });
+  document.getElementById('page-'+page).classList.add('active');
+  if (el) el.classList.add('active');
+  if (page==='dashboard') loadDashboard();
+  if (page==='coupons')   loadCoupons();
+}
+
+// ── Loading ───────────────────────────────────────────────────
+function showLoad(msg) { document.getElementById('loadingText').textContent=msg||'LOADING...'; document.getElementById('loadingOverlay').classList.add('on'); }
+function hideLoad() { document.getElementById('loadingOverlay').classList.remove('on'); }
+
+// ── Modal ─────────────────────────────────────────────────────
+function showModal(title, sub, txn) {
+  document.getElementById('modalTitle').textContent = title;
+  document.getElementById('modalSub').textContent   = sub;
+  document.getElementById('modalTxn').textContent   = txn;
+  document.getElementById('successModal').classList.add('on');
+}
+function closeModal() {
+  document.getElementById('successModal').classList.remove('on');
+  resetSearch();
+}
+
+// ── Alerts ────────────────────────────────────────────────────
+function alertHtml(type, msg) {
+  var icons = { success:'✓', error:'✕', info:'ℹ' };
+  return '<div class="alert alert-'+type+'"><span>'+icons[type]+'</span><span>'+esc(msg)+'</span></div>';
+}
+
+// ── Dashboard ─────────────────────────────────────────────────
+function loadDashboard() {
+  showLoad('LOADING STATS...');
+  google.script.run
+    .withSuccessHandler(function(res) {
+      hideLoad();
+      if (!res.success) return;
+      var s = res.stats;
+      document.getElementById('st-total').textContent  = s.totalTransactions.toLocaleString();
+      document.getElementById('st-rev').textContent    = 'Rs'+(s.totalRevenue>=1000?(s.totalRevenue/1000).toFixed(1)+'K':s.totalRevenue.toLocaleString());
+      document.getElementById('st-exp').textContent    = s.expired.toLocaleString();
+      document.getElementById('st-exp15').textContent  = s.expiringIn15.toLocaleString();
+      document.getElementById('st-ren').textContent    = s.renewals.toLocaleString();
+      document.getElementById('st-logs').textContent   = s.totalLogs.toLocaleString();
+    })
+    .withFailureHandler(function(e){ hideLoad(); })
+    .getDashboardStats();
+}
+
+// ── Search ────────────────────────────────────────────────────
+function doSearch() {
+  var phone = document.getElementById('searchPhone').value.trim();
+  if (phone.length!==10) { document.getElementById('searchErr').innerHTML=alertHtml('error','Enter a valid 10-digit number'); return; }
+  document.getElementById('searchErr').innerHTML='';
+  showLoad('SEARCHING...');
+  google.script.run
+    .withSuccessHandler(function(res) {
+      hideLoad();
+      if (!res.success) { document.getElementById('searchErr').innerHTML=alertHtml('error',res.error); return; }
+      state.search = res;
+      renderResults(res);
+    })
+    .withFailureHandler(function(e){ hideLoad(); document.getElementById('searchErr').innerHTML=alertHtml('error',e.message); })
+    .searchUser(phone);
+}
+
+function renderResults(res) {
+  document.getElementById('step-search').style.display='none';
+  document.getElementById('step-results').style.display='block';
+  var initials = (res.customerName||'?').split(' ').map(function(w){return w[0];}).join('').toUpperCase().slice(0,2);
+  document.getElementById('customerCard').innerHTML =
+    '<div style="display:flex;align-items:center;gap:14px">'
+    +'<div style="width:44px;height:44px;border-radius:50%;background:var(--accent);display:flex;align-items:center;justify-content:center;font-family:var(--display);font-size:16px;font-weight:700;color:#080a0d;flex-shrink:0">'+initials+'</div>'
+    +'<div><div style="font-family:var(--display);font-size:15px;font-weight:700">'+esc(res.customerName)+'</div>'
+    +'<div style="font-family:var(--mono);font-size:10px;color:var(--text2);margin-top:3px">'+esc(res.phone)+(res.email?' &middot; '+esc(res.email):'')+'</div>'
+    +'</div>'
+    +'<span class="badge badge-green" style="margin-left:auto">Found</span>'
+    +'</div>';
+
+  var list = document.getElementById('courseList');
+  list.innerHTML = '';
+  res.courses.forEach(function(c) {
+    var exp = c.isExpired;
+    var badge = exp ? '<span class="badge badge-red">Expired '+Math.abs(c.daysRemaining)+'d ago</span>'
+      : c.daysRemaining<=15 ? '<span class="badge badge-amber">Expires in '+c.daysRemaining+'d</span>'
+      : '<span class="badge badge-green">Active</span>';
+    var div = document.createElement('div');
+    div.className='course-card'; div.dataset.course=JSON.stringify(c);
+    div.innerHTML='<div style="display:flex;align-items:flex-start;justify-content:space-between;gap:10px;margin-bottom:8px">'
+      +'<div class="course-name">'+esc(c.course)+'</div>'+badge+'</div>'
+      +'<div class="course-meta">'
+      +'<div class="course-meta-item">Purchased: <strong>'+esc(c.purchaseDate||'—')+'</strong></div>'
+      +'<div class="course-meta-item">Expires: <strong>'+esc(c.expiryDate||'—')+'</strong></div>'
+      +'<div class="course-meta-item">Paid: <strong>Rs'+fmtN(c.amount)+'</strong></div>'
+      +'</div>';
+    div.onclick=function(){ document.querySelectorAll('.course-card').forEach(function(x){x.classList.remove('selected');}); div.classList.add('selected'); state.selected=c; document.getElementById('proceedBtn').disabled=false; };
+    list.appendChild(div);
+  });
+}
+
+function resetSearch() {
+  document.getElementById('step-search').style.display='block';
+  document.getElementById('step-results').style.display='none';
+  document.getElementById('step-form').style.display='none';
+  document.getElementById('searchPhone').value='';
+  document.getElementById('searchErr').innerHTML='';
+  state.search=null; state.selected=null; state.coupon=null;
+}
+
+// ── Form ──────────────────────────────────────────────────────
+function showForm() {
+  if (!state.selected) return;
+  var c = state.selected, r = state.search;
+  document.getElementById('step-results').style.display='none';
+  document.getElementById('step-form').style.display='block';
+  document.getElementById('formCustomerCard').innerHTML=document.getElementById('customerCard').innerHTML;
+  document.getElementById('fCourse').value=c.course;
+  document.getElementById('fExpiry').value=c.expiryDate||'N/A';
+  document.getElementById('entryType').value=c.isExpired?'RENEWAL':'EXTENSION';
+  document.getElementById('fAmount').value='';
+  document.getElementById('fNotes').value='';
+  document.getElementById('fCoupon').value='';
+  document.getElementById('fProcessor').value='';
+  document.getElementById('formErr').innerHTML='';
+  document.getElementById('couponResult').innerHTML='';
+  document.getElementById('removeCouponBtn').style.display='none';
+  state.coupon=null;
+  var base = c.expiryDate&&!c.isExpired ? new Date(c.expiryDate) : new Date();
+  base.setFullYear(base.getFullYear()+1);
+  document.getElementById('newExpiry').value=base.toISOString().split('T')[0];
+  calcPricing();
+}
+
+function backToResults() {
+  document.getElementById('step-results').style.display='block';
+  document.getElementById('step-form').style.display='none';
+  state.coupon=null;
+}
+
+function calcPricing() {
+  var amt  = parseFloat(document.getElementById('fAmount').value)||0;
+  var disc = state.coupon ? state.coupon.discountAmount : 0;
+  var fin  = Math.max(0, amt-disc);
+  document.getElementById('pOrig').textContent='Rs '+fmtN(amt);
+  document.getElementById('pFinal').textContent='Rs '+fmtN(fin);
+  document.getElementById('pDiscRow').style.display=disc>0?'':'none';
+  document.getElementById('pDisc').textContent='-Rs '+fmtN(disc);
+}
+
+function applyCoupon() {
+  var code = document.getElementById('fCoupon').value.trim().toUpperCase();
+  var amt  = parseFloat(document.getElementById('fAmount').value)||0;
+  var et   = document.getElementById('entryType').value;
+  if (!code) { document.getElementById('couponResult').innerHTML=alertHtml('error','Enter a coupon code'); return; }
+  if (!amt)  { document.getElementById('couponResult').innerHTML=alertHtml('error','Enter amount first'); return; }
+  showLoad('VALIDATING...');
+  google.script.run
+    .withSuccessHandler(function(res) {
+      hideLoad();
+      if (!res.success) { document.getElementById('couponResult').innerHTML=alertHtml('error',res.error); return; }
+      state.coupon=res;
+      document.getElementById('couponResult').innerHTML=alertHtml('success','Coupon applied! Save Rs'+fmtN(res.discountAmount));
+      document.getElementById('removeCouponBtn').style.display='';
+      calcPricing();
+    })
+    .withFailureHandler(function(e){ hideLoad(); document.getElementById('couponResult').innerHTML=alertHtml('error',e.message); })
+    .validateCoupon(code, state.search.phone, amt, et, state.selected.course);
+}
+
+function removeCoupon() {
+  state.coupon=null;
+  document.getElementById('fCoupon').value='';
+  document.getElementById('couponResult').innerHTML='';
+  document.getElementById('removeCouponBtn').style.display='none';
+  calcPricing();
+}
+
+function submitRenewal() {
+  var amt    = parseFloat(document.getElementById('fAmount').value);
+  var expiry = document.getElementById('newExpiry').value;
+  var et     = document.getElementById('entryType').value;
+  if (!amt||amt<=0) { document.getElementById('formErr').innerHTML=alertHtml('error','Enter a valid amount'); return; }
+  if (!expiry)      { document.getElementById('formErr').innerHTML=alertHtml('error','Select a new expiry date'); return; }
+  document.getElementById('formErr').innerHTML='';
+  document.getElementById('submitBtn').disabled=true;
+  showLoad('PROCESSING...');
+  var body = {
+    phone:state.search.phone, course:state.selected.course, entryType:et, amount:amt,
+    couponCode:state.coupon?state.coupon.couponCode:'',
+    discountAmount:state.coupon?state.coupon.discountAmount:0,
+    couponRowIndex:state.coupon?state.coupon.rowIndex:null,
+    newExpiryDate:expiry, oldExpiryDate:state.selected.expiryDate,
+    processedBy:document.getElementById('fProcessor').value||'',
+    notes:document.getElementById('fNotes').value||'',
+    parentTxnId:state.selected.transactionId||''
+  };
+  google.script.run
+    .withSuccessHandler(function(res) {
+      hideLoad(); document.getElementById('submitBtn').disabled=false;
+      if (!res.success) { document.getElementById('formErr').innerHTML=alertHtml('error',res.error); return; }
+      showModal(et+' Processed!',
+        res.customerName+' — '+res.course+'\nNew expiry: '+res.newExpiryDate+' (+'+res.daysExtended+'d)\nPaid: Rs'+fmtN(res.amountPaid)+(res.discountApplied?' (Rs'+fmtN(res.discountApplied)+' off)':''),
+        'TXN: '+res.transactionId);
+    })
+    .withFailureHandler(function(e){ hideLoad(); document.getElementById('submitBtn').disabled=false; document.getElementById('formErr').innerHTML=alertHtml('error',e.message); })
+    .processRenewal(body);
+}
+
+// ── History ───────────────────────────────────────────────────
+function loadHistory() {
+  var phone = document.getElementById('histPhone').value.trim();
+  if (phone.length<10) { document.getElementById('histResults').innerHTML=alertHtml('error','Enter a valid number'); return; }
+  showLoad('LOADING...');
+  google.script.run
+    .withSuccessHandler(function(res) {
+      hideLoad();
+      if (!res.success||!res.history.length) {
+        document.getElementById('histResults').innerHTML='<div class="empty"><div class="empty-icon">📭</div><div class="empty-title">No history found</div><div class="empty-sub">No renewals for this number</div></div>';
+        return;
+      }
+      var cols=['NewTxnID','Course','RenewalType','OldExpiryDate','NewExpiryDate','DaysExtended','AmountPaid','CouponUsed','Timestamp'];
+      document.getElementById('histResults').innerHTML='<div class="card" style="padding:0;overflow:hidden"><div class="table-wrap"><table><thead><tr>'+cols.map(function(c){return '<th>'+c+'</th>';}).join('')+'</tr></thead><tbody>'
+        +res.history.map(function(r){
+          return '<tr>'+cols.map(function(c){
+            var v=r[c]!==undefined?r[c]:'—';
+            if(c==='RenewalType') return '<td><span class="badge '+(v==='RENEWAL'?'badge-amber':'badge-muted')+'">'+esc(String(v))+'</span></td>';
+            if(c==='AmountPaid')  return '<td><strong>Rs'+fmtN(v)+'</strong></td>';
+            return '<td>'+esc(String(v))+'</td>';
+          }).join('')+'</tr>';
+        }).join('')+'</tbody></table></div></div>';
+    })
+    .withFailureHandler(function(e){ hideLoad(); document.getElementById('histResults').innerHTML=alertHtml('error',e.message); })
+    .getRenewalHistory(phone);
+}
+
+// ── Coupons ───────────────────────────────────────────────────
+function cpPreview() {
+  var code=document.getElementById('cp_code').value||'CODE';
+  var type=document.getElementById('cp_type').value;
+  var val=parseFloat(document.getElementById('cp_val').value)||0;
+  var prev=document.getElementById('cpPreviewBox');
+  if (!val) { prev.style.display='none'; return; }
+  prev.style.display='';
+  document.getElementById('cpPreviewText').textContent=code+' — '+(type==='PERCENT'?val+'% off':'Rs'+val+' off')+' on renewal';
+}
+
+function createCoupon() {
+  var code=document.getElementById('cp_code').value.trim().toUpperCase();
+  var type=document.getElementById('cp_type').value;
+  var val=document.getElementById('cp_val').value;
+  var max=document.getElementById('cp_max').value;
+  var min=document.getElementById('cp_min').value;
+  var days=document.getElementById('cp_days').value;
+  var notes=document.getElementById('cp_notes').value.trim();
+  var res=document.getElementById('cpResult');
+  if (!code) { res.innerHTML=alertHtml('error','Coupon code required'); return; }
+  if (!val)  { res.innerHTML=alertHtml('error','Discount value required'); return; }
+  res.innerHTML=''; showLoad('CREATING...');
+  google.script.run
+    .withSuccessHandler(function(r){ hideLoad(); res.innerHTML=r.success?alertHtml('success',r.message):alertHtml('error',r.error); if(r.success){['cp_code','cp_val','cp_max','cp_min','cp_notes'].forEach(function(id){document.getElementById(id).value='';}); document.getElementById('cpPreviewBox').style.display='none'; loadCoupons();} })
+    .withFailureHandler(function(e){ hideLoad(); res.innerHTML=alertHtml('error',e.message); })
+    .createMonthlyCoupon({couponCode:code,discountType:type,discountValue:val,minOrder:min,maxDiscount:max,notes:notes,validityDays:days});
+}
+
+function loadCoupons() {
+  document.getElementById('cpTable').innerHTML='<div style="padding:28px;text-align:center;color:var(--text3);font-size:12px">Loading...</div>';
+  document.getElementById('cpCount').textContent='';
+  google.script.run
+    .withSuccessHandler(function(res){
+      if (!res.success||!res.coupons||!res.coupons.length) {
+        document.getElementById('cpTable').innerHTML='<div class="empty"><div class="empty-icon">&#127991;</div><div class="empty-title">No coupons yet</div><div class="empty-sub">Create one above</div></div>';
+        return;
+      }
+      document.getElementById('cpCount').textContent=res.coupons.length+' coupons';
+      var today=new Date();
+      var rows=res.coupons.map(function(c){
+        var active=c['IsActive']===true||String(c['IsActive']).toUpperCase()==='TRUE';
+        var vTo=c['ValidTo']?new Date(c['ValidTo']):null;
+        var exp=vTo&&vTo<today;
+        var type=(c['DiscountType']||'').toUpperCase();
+        var val=parseFloat(c['DiscountValue'])||0;
+        var disc=type==='PERCENT'?val+'%':'Rs'+val;
+        var badge=exp?'<span class="badge badge-red">Expired</span>':active?'<span class="badge badge-green">Active</span>':'<span class="badge badge-muted">Inactive</span>';
+        return '<tr>'
+          +'<td><strong style="font-family:var(--mono);color:var(--accent)">'+esc(c['CouponCode']||'')+'</strong></td>'
+          +'<td>'+badge+'</td>'
+          +'<td><strong>'+disc+'</strong></td>'
+          +'<td style="font-family:var(--mono);font-size:10px">'+esc(c['ValidFrom']||'')+' → '+esc(c['ValidTo']||'')+'</td>'
+          +'<td style="font-family:var(--mono)">'+(c['TimesUsed']||0)+'</td>'
+          +'<td>'+esc(c['Notes']||'')+'</td>'
+          +'<td><button class="btn btn-sm '+(active?'btn-danger':'btn-success')+'" onclick="toggleCoupon('+c._row+')">'+(active?'Deactivate':'Activate')+'</button></td>'
+          +'</tr>';
+      }).join('');
+      document.getElementById('cpTable').innerHTML='<table><thead><tr><th>Code</th><th>Status</th><th>Discount</th><th>Valid period</th><th>Used</th><th>Notes</th><th>Action</th></tr></thead><tbody>'+rows+'</tbody></table>';
+    })
+    .withFailureHandler(function(e){ document.getElementById('cpTable').innerHTML='<div style="padding:24px;color:var(--red);font-size:12px">Error: '+e.message+'</div>'; })
+    .listCoupons();
+}
+
+function toggleCoupon(row) {
+  showLoad('UPDATING...');
+  google.script.run
+    .withSuccessHandler(function(r){ hideLoad(); if(r.success) loadCoupons(); })
+    .withFailureHandler(function(){ hideLoad(); })
+    .deactivateCoupon(row);
+}
+
+// ── Setup ─────────────────────────────────────────────────────
+function runSetup() {
+  document.getElementById('setupBtn').disabled=true;
+  showLoad('INITIALIZING...');
+  google.script.run
+    .withSuccessHandler(function(res){ hideLoad(); document.getElementById('setupBtn').disabled=false; document.getElementById('setupResult').innerHTML=res.success?alertHtml('success',res.message.replace(/\n/g,'<br>')):alertHtml('error',res.error); })
+    .withFailureHandler(function(e){ hideLoad(); document.getElementById('setupBtn').disabled=false; document.getElementById('setupResult').innerHTML=alertHtml('error',e.message); })
+    .setupSheets();
+}
+
+// ── Utilities ─────────────────────────────────────────────────
+function esc(s){ var d=document.createElement('div'); d.textContent=s; return d.innerHTML; }
+function fmtN(n){ return Number(n||0).toLocaleString('en-IN'); }
+</script>
+</body>
+</html>
