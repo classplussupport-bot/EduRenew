@@ -384,8 +384,14 @@ body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellips
 <script>
 // ── Master sheet config (hardcoded — one master sheet for all clients) ──
 // Set these once. The API key needs Google Sheets API enabled in Google Cloud.
-var MASTER_SHEET_ID = '1FVtnIz2d5KNfdmAtSeaL87eusT4Ep5Nj7b2vbsa2W6o';  // ← paste your master sheet ID here (one-time)
-var SHEETS_API_KEY  = '';  // ← paste your Google Sheets API key here (one-time)
+var MASTER_SHEET_ID = '1FVtnIz2d5KNfdmAtSeaL87eusT4Ep5Nj7b2vbsa2W6o';
+var SHEETS_API_KEY  = 'AIzaSyBhyvXDrSy7SUCehYkCQ00Mr2D4Uhhnnj8';
+
+// ── Central HTML URLs — hosted on GitHub, fetched by every client's doGet() ──
+// Update Index.html or Student_Demo.html on GitHub → all clients get the change instantly.
+// Replace these with your actual GitHub raw URLs once you push the files.
+var CENTRAL_ADMIN_URL   = 'https://raw.githubusercontent.com/YOUR_ORG/edurenew/main/Index.html';
+var CENTRAL_STUDENT_URL = 'https://raw.githubusercontent.com/YOUR_ORG/edurenew/main/Student_Demo.html';
 
 // ── Default column mappings (standard Classplus export headers) ──
 // These are baked into every generated Code.gs.
@@ -521,13 +527,28 @@ colLines,
 '};',
 '',
 '// ============================================================',
-'//  doGet — serves admin or student portal',
+'//  doGet — fetches HTML from GitHub (central) with local fallback',
+'//  To update UI for ALL clients: just push to GitHub. No re-deploy needed.',
 '// ============================================================',
+"const CENTRAL_ADMIN_URL   = '"+CENTRAL_ADMIN_URL+"';",
+"const CENTRAL_STUDENT_URL = '"+CENTRAL_STUDENT_URL+"';",
+'',
 'function doGet(e) {',
-"  var page = (e && e.parameter && e.parameter.page) || 'admin';",
-"  var file = page === 'student' ? 'Student_Demo' : 'Index';",
-"  var title = page === 'student' ? CLIENT.orgName+' — Student Portal' : CLIENT.orgName+' — Admin';",
-'  return HtmlService.createHtmlOutputFromFile(file)',
+"  var page      = (e && e.parameter && e.parameter.page) || 'admin';",
+"  var isStudent = page === 'student';",
+"  var title     = isStudent ? CLIENT.orgName+' — Student Portal' : CLIENT.orgName+' — Admin';",
+'  var centralUrl = isStudent ? CENTRAL_STUDENT_URL : CENTRAL_ADMIN_URL;',
+"  var localFile  = isStudent ? 'Student_Demo' : 'Index';",
+'  try {',
+"    var resp = UrlFetchApp.fetch(centralUrl, { muteHttpExceptions: true });",
+'    if (resp.getResponseCode() === 200) {',
+'      return HtmlService.createHtmlOutput(resp.getContentText())',
+'        .setTitle(title)',
+'        .setXFrameOptionsMode(HtmlService.XFrameOptionsMode.ALLOWALL);',
+'    }',
+'  } catch(_) {}',
+'  // Fallback to local file if GitHub fetch fails',
+'  return HtmlService.createHtmlOutputFromFile(localFile)',
 '    .setTitle(title)',
 '    .setXFrameOptionsMode(HtmlService.XFrameOptionsMode.ALLOWALL);',
 '}',
