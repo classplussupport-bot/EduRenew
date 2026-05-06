@@ -1,0 +1,906 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
+<title>My Courses</title>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=DM+Mono:ital,wght@0,400;0,500;1,400&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#09090f;--bg2:#0f0f1a;--bg3:#141420;--card:#14141f;
+  --border:#1e1e30;--border2:#282840;
+  --text:#e8eaf2;--text2:#9294a8;--text3:#4a4c64;
+  --gold:#f5c842;--gold2:#e8b830;
+  --teal:#2dd4bf;--green:#4ade80;--rose:#fb7185;--amber:#fbbf24;
+  --rose-bg:rgba(251,113,133,.06);
+  --r:14px;--r-sm:10px;--r-xs:6px;
+  --font:'Plus Jakarta Sans',sans-serif;--mono:'DM Mono',monospace;
+}
+body{font-family:var(--font);background:var(--bg);color:var(--text);min-height:100vh;font-size:14px;line-height:1.6;overflow-x:hidden}
+body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellipse 80% 50% at 50% -10%,rgba(245,200,66,.06),transparent);pointer-events:none;z-index:0}
+
+/* ── AUTH SHELL ── */
+#authShell{position:fixed;inset:0;display:none;align-items:center;justify-content:center;z-index:100;padding:16px;background:var(--bg)}
+.auth-card{background:var(--bg2);border:1px solid var(--border);border-radius:20px;padding:32px 28px;width:100%;max-width:380px;position:relative;z-index:1}
+.auth-card::before{content:'';position:absolute;inset:0;border-radius:20px;background:linear-gradient(135deg,rgba(245,200,66,.04),transparent);pointer-events:none}
+@keyframes slideIn{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:none}}
+.anim-slide{animation:slideIn .25s ease}
+
+.auth-logo{display:flex;align-items:center;gap:10px;margin-bottom:24px}
+.auth-logo-icon{width:40px;height:40px;border-radius:10px;background:var(--gold);display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0}
+.auth-logo-name{font-size:15px;font-weight:700;color:var(--text);line-height:1.1}
+.auth-logo-sub{font-size:11px;color:var(--text3)}
+
+.progress{display:flex;gap:5px;margin-bottom:22px}
+.progress-dot{height:3px;border-radius:3px;background:var(--border2);flex:1;transition:background .3s}
+.progress-dot.active{background:var(--gold)}
+
+.auth-heading{font-size:22px;font-weight:800;color:var(--text);letter-spacing:-.3px;margin-bottom:5px}
+.auth-sub{font-size:13px;color:var(--text2);margin-bottom:22px;line-height:1.6}
+
+/* Phone input */
+.field{margin-bottom:16px}
+.field-label{font-family:var(--mono);font-size:9px;letter-spacing:1px;text-transform:uppercase;color:var(--text2);display:block;margin-bottom:5px}
+.field-input{width:100%;background:var(--bg3);border:1.5px solid var(--border2);border-radius:var(--r-sm);padding:12px 14px;color:var(--text);font-family:var(--font);font-size:15px;outline:none;transition:border-color .15s,box-shadow .15s}
+.field-input::placeholder{color:var(--text3);font-size:14px}
+.field-input:focus{border-color:var(--gold);box-shadow:0 0 0 3px rgba(245,200,66,.1)}
+.phone-wrap{display:flex;align-items:center;background:var(--bg3);border:1.5px solid var(--border2);border-radius:var(--r-sm);overflow:hidden;transition:border-color .15s,box-shadow .15s}
+.phone-wrap:focus-within{border-color:var(--gold);box-shadow:0 0 0 3px rgba(245,200,66,.1)}
+.phone-prefix{padding:12px 10px 12px 14px;font-size:15px;font-weight:700;color:var(--text2);border-right:1.5px solid var(--border2);white-space:nowrap;user-select:none;font-family:var(--mono)}
+.phone-wrap .field-input{border:none;border-radius:0;background:transparent;padding-left:10px;box-shadow:none!important}
+
+/* PIN boxes */
+.pin-row{display:flex;gap:10px;margin-bottom:6px}
+.pin-box{width:56px;height:56px;background:var(--bg3);border:2px solid var(--border2);border-radius:var(--r-sm);text-align:center;font-size:22px;font-weight:700;color:var(--text);font-family:var(--mono);outline:none;transition:all .15s}
+.pin-box:focus{border-color:var(--gold);box-shadow:0 0 0 3px rgba(245,200,66,.1)}
+.pin-box.filled{border-color:var(--gold);background:rgba(245,200,66,.05)}
+.pin-hint{font-size:12px;color:var(--text3);margin-bottom:14px;display:flex;align-items:center;justify-content:space-between}
+.pin-toggle{background:none;border:none;color:var(--text2);font-size:12px;cursor:pointer;font-family:var(--font)}
+
+/* Buttons */
+.btn-primary{width:100%;background:var(--gold);color:#080808;font-family:var(--font);font-size:14px;font-weight:700;padding:13px;border:none;border-radius:var(--r-sm);cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;transition:all .15s;margin-top:8px}
+.btn-primary:hover:not(:disabled){background:var(--gold2);transform:translateY(-1px)}
+.btn-primary:disabled{opacity:.45;cursor:not-allowed}
+.btn-link{background:none;border:none;color:var(--text2);font-size:12px;cursor:pointer;font-family:var(--font);text-decoration:underline;padding:0}
+.btn-link:hover{color:var(--text)}
+
+.spin{width:16px;height:16px;border:2px solid rgba(8,8,8,.2);border-top-color:#080808;border-radius:50%;animation:rotate .6s linear infinite;display:none;flex-shrink:0}
+@keyframes rotate{to{transform:rotate(360deg)}}
+
+.err-box{background:rgba(251,113,133,.08);border:1px solid rgba(251,113,133,.2);border-radius:var(--r-xs);padding:8px 12px;font-size:12px;color:var(--rose);display:none;margin-top:10px}
+
+.back-link{display:flex;align-items:center;gap:5px;background:none;border:none;color:var(--text2);font-size:12px;cursor:pointer;font-family:var(--font);margin-top:14px;padding:0}
+.back-link:hover{color:var(--text)}
+
+/* ── DASHBOARD ── */
+#dashboard{display:none;min-height:100vh;position:relative;z-index:1}
+#dashboard.visible{display:block}
+
+.dash-header{background:var(--bg2);border-bottom:1px solid var(--border);padding:14px 20px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:50}
+.dash-header-left{display:flex;align-items:center;gap:10px}
+.header-logo-icon{width:32px;height:32px;border-radius:8px;background:var(--gold);display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0}
+.header-org{font-size:13px;font-weight:700;color:var(--text)}
+.dash-avatar{width:36px;height:36px;border-radius:50%;background:linear-gradient(135deg,var(--gold),var(--gold2));display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:700;color:#080808;cursor:pointer;border:2px solid transparent;transition:border-color .15s}
+.dash-avatar:hover{border-color:var(--gold)}
+
+.dash-hero{padding:24px 20px 0}
+.dash-greeting{font-size:11px;font-family:var(--mono);color:var(--text3);letter-spacing:.5px;text-transform:uppercase;margin-bottom:4px}
+.dash-name{font-size:22px;font-weight:800;color:var(--text);letter-spacing:-.3px}
+.dash-phone{font-size:12px;font-family:var(--mono);color:var(--text2);margin-top:2px}
+
+/* Tabs */
+.dash-tabs{display:flex;padding:0 20px;margin-top:20px;border-bottom:1px solid var(--border);overflow-x:auto;gap:0}
+.dash-tab{padding:10px 16px;font-size:13px;font-weight:500;color:var(--text2);cursor:pointer;border-bottom:2px solid transparent;white-space:nowrap;transition:all .15s;background:none;border-top:none;border-left:none;border-right:none;font-family:var(--font)}
+.dash-tab.active{color:var(--gold);border-bottom-color:var(--gold)}
+.tab-panel{display:none;padding:20px}
+.tab-panel.active{display:block}
+
+/* Course cards */
+.course-card{background:var(--card);border:1px solid var(--border);border-radius:var(--r);padding:16px;margin-bottom:12px;border-left:3px solid var(--card-accent,var(--border))}
+.course-card-top{display:flex;align-items:flex-start;justify-content:space-between;gap:10px;margin-bottom:10px}
+.course-name{font-size:15px;font-weight:700;color:var(--text);line-height:1.3}
+.course-org{font-size:11px;color:var(--text3);margin-top:2px}
+.status-pill{font-size:10px;font-family:var(--mono);font-weight:500;padding:3px 8px;border-radius:20px;white-space:nowrap;flex-shrink:0}
+.status-active{background:rgba(74,222,128,.1);color:var(--green);border:1px solid rgba(74,222,128,.2)}
+.status-expiring{background:rgba(251,191,36,.1);color:var(--amber);border:1px solid rgba(251,191,36,.2)}
+.status-expired{background:rgba(251,113,133,.1);color:var(--rose);border:1px solid rgba(251,113,133,.2)}
+.course-meta{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-bottom:12px}
+.meta-label{font-family:var(--mono);font-size:9px;letter-spacing:.5px;text-transform:uppercase;color:var(--text3);margin-bottom:2px}
+.meta-value{font-size:13px;font-weight:600;color:var(--text)}
+.meta-value.highlight{color:var(--teal)}
+.course-actions{display:flex;flex-direction:column;gap:8px}
+
+/* Coupon banner on card */
+.coupon-card-banner{background:rgba(74,222,128,.07);border:1px solid rgba(74,222,128,.2);border-radius:var(--r-xs);padding:8px 11px;font-size:12px;color:var(--green);display:flex;align-items:center;gap:7px;margin-bottom:8px}
+.coupon-card-banner strong{font-weight:700}
+
+/* Renew / Extend buttons */
+.btn-renew{background:var(--gold);color:#080808;font-family:var(--font);font-size:13px;font-weight:700;padding:10px 16px;border:none;border-radius:var(--r-sm);cursor:pointer;width:100%;transition:all .15s;text-align:center}
+.btn-renew:hover{background:var(--gold2);transform:translateY(-1px)}
+.btn-ghost-sm{background:transparent;border:1px solid var(--border2);color:var(--text2);font-family:var(--font);font-size:12px;padding:8px 14px;border-radius:var(--r-sm);cursor:pointer;width:100%;transition:all .15s}
+.btn-ghost-sm:hover{border-color:var(--border);color:var(--text)}
+.locked-msg{background:var(--bg3);border:1px solid var(--border);border-radius:var(--r-sm);padding:8px 12px;font-size:12px;color:var(--text3);text-align:center}
+
+/* Renew window banner */
+.renew-window{background:rgba(251,191,36,.07);border:1px solid rgba(251,191,36,.2);border-radius:var(--r-xs);padding:7px 11px;font-size:11px;color:var(--amber);margin-bottom:8px;display:flex;align-items:center;gap:6px}
+
+/* History */
+.history-list{display:flex;flex-direction:column;gap:10px}
+.history-item{background:var(--card);border:1px solid var(--border);border-radius:var(--r);padding:14px;display:flex;gap:12px}
+.history-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0;margin-top:5px}
+.history-dot.renewal{background:var(--gold)}
+.history-dot.extension{background:var(--teal)}
+.history-course{font-size:13px;font-weight:700;color:var(--text)}
+.history-row1{display:flex;align-items:center;gap:8px;margin-bottom:4px;flex-wrap:wrap}
+.history-pill{font-size:10px;font-family:var(--mono);padding:2px 7px;border-radius:20px}
+.history-pill.renewal{background:rgba(245,200,66,.1);color:var(--gold);border:1px solid rgba(245,200,66,.2)}
+.history-pill.extension{background:rgba(45,212,191,.1);color:var(--teal);border:1px solid rgba(45,212,191,.2)}
+.history-dates{font-size:12px;color:var(--text2);margin-bottom:2px}
+.history-amount{font-size:12px;color:var(--text3)}
+.history-empty{text-align:center;padding:40px 20px;color:var(--text2)}
+.history-empty-icon{font-size:36px;margin-bottom:10px;display:block;opacity:.35}
+.history-empty-text{font-size:14px;font-weight:600;color:var(--text);margin-bottom:4px}
+
+/* Confirm overlay */
+.confirm-overlay{position:fixed;inset:0;background:rgba(9,9,15,.92);backdrop-filter:blur(8px);z-index:200;display:flex;align-items:flex-end;justify-content:center;opacity:0;pointer-events:none;transition:opacity .25s;padding:16px}
+.confirm-overlay.open{opacity:1;pointer-events:all}
+.confirm-sheet{background:var(--bg2);border:1px solid var(--border);border-radius:20px 20px 14px 14px;padding:28px;width:100%;max-width:460px;transform:translateY(20px);transition:transform .25s}
+.confirm-overlay.open .confirm-sheet{transform:translateY(0)}
+.confirm-type-badge{display:inline-flex;align-items:center;gap:5px;font-size:11px;font-family:var(--mono);font-weight:500;padding:3px 10px;border-radius:20px;margin-bottom:14px}
+.modal-type-renewal{background:rgba(245,200,66,.1);color:var(--gold);border:1px solid rgba(245,200,66,.2)}
+.modal-type-extension{background:rgba(45,212,191,.1);color:var(--teal);border:1px solid rgba(45,212,191,.2)}
+.confirm-title{font-size:20px;font-weight:800;color:var(--text);letter-spacing:-.3px;margin-bottom:4px}
+.confirm-course{font-size:13px;color:var(--text2);margin-bottom:16px}
+.confirm-details{background:var(--bg3);border:1px solid var(--border);border-radius:var(--r-sm);padding:14px;margin-bottom:14px}
+.confirm-row{display:flex;justify-content:space-between;font-size:13px;padding:5px 0;border-bottom:1px solid var(--border)}
+.confirm-row:last-child{border-bottom:none;padding-top:10px;margin-top:4px}
+.confirm-row span:first-child{color:var(--text2)}
+.confirm-row span:last-child{color:var(--text);font-family:var(--mono);font-size:12px}
+.confirm-row.total span:last-child{color:var(--gold);font-size:16px;font-family:var(--font);font-weight:700}
+
+/* Coupon input in confirm sheet */
+.coupon-input-area{margin-bottom:14px}
+.coupon-input-row{display:flex;gap:8px;margin-bottom:6px}
+.coupon-input-row input{flex:1;background:var(--bg3);border:1.5px solid var(--border2);border-radius:var(--r-sm);padding:9px 12px;color:var(--text);font-family:var(--mono);font-size:13px;letter-spacing:1px;text-transform:uppercase;outline:none}
+.coupon-input-row input:focus{border-color:var(--gold)}
+.btn-apply{background:var(--bg3);border:1.5px solid var(--border2);color:var(--text2);font-family:var(--font);font-size:12px;font-weight:600;padding:9px 14px;border-radius:var(--r-sm);cursor:pointer;white-space:nowrap;transition:all .15s}
+.btn-apply:hover{border-color:var(--gold);color:var(--gold)}
+.coupon-success{background:rgba(74,222,128,.07);border:1px solid rgba(74,222,128,.2);border-radius:var(--r-xs);padding:7px 11px;font-size:12px;color:var(--green);display:flex;align-items:center;justify-content:space-between}
+.btn-remove-coupon{background:none;border:none;color:var(--rose);font-size:11px;cursor:pointer;font-family:var(--font)}
+
+.offer-tag{display:inline-flex;align-items:center;gap:5px;font-size:11px;font-family:var(--mono);padding:3px 9px;border-radius:20px;background:rgba(74,222,128,.08);color:var(--green);border:1px solid rgba(74,222,128,.2);margin-bottom:12px}
+.confirm-actions{display:flex;gap:10px}
+.btn-confirm-primary{flex:1;background:var(--gold);color:#080808;font-family:var(--font);font-size:14px;font-weight:700;padding:13px;border:none;border-radius:var(--r-sm);cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;transition:all .15s}
+.btn-confirm-primary:disabled{opacity:.45;cursor:not-allowed}
+.btn-confirm-secondary{background:var(--bg3);border:1px solid var(--border2);color:var(--text2);font-family:var(--font);font-size:13px;padding:13px 18px;border-radius:var(--r-sm);cursor:pointer}
+.confirm-spin{width:16px;height:16px;border:2px solid rgba(8,8,8,.2);border-top-color:#080808;border-radius:50%;animation:rotate .6s linear infinite;display:none}
+
+/* Success overlay */
+.success-overlay{position:fixed;inset:0;background:rgba(9,9,15,.95);backdrop-filter:blur(10px);z-index:300;display:flex;align-items:center;justify-content:center;opacity:0;pointer-events:none;transition:opacity .25s;padding:20px}
+.success-overlay.open{opacity:1;pointer-events:all}
+.success-card{background:var(--bg2);border:1px solid var(--border);border-radius:20px;padding:32px;width:100%;max-width:420px;text-align:center}
+.success-icon{font-size:48px;margin-bottom:14px}
+.success-title{font-size:22px;font-weight:800;color:var(--text);letter-spacing:-.3px;margin-bottom:6px}
+.success-msg{font-size:13px;color:var(--text2);margin-bottom:18px;line-height:1.7}
+.success-details{background:var(--bg3);border:1px solid var(--border);border-radius:var(--r-sm);padding:14px;margin-bottom:18px;text-align:left}
+.success-detail-row{display:flex;justify-content:space-between;font-size:12px;padding:5px 0;border-bottom:1px solid var(--border)}
+.success-detail-row:last-child{border-bottom:none}
+.success-detail-row .lbl{color:var(--text2)}
+
+/* Toasts */
+#toasts{position:fixed;bottom:20px;right:20px;z-index:999;display:flex;flex-direction:column;gap:8px}
+.toast-item{background:var(--bg2);border:1px solid var(--border2);border-radius:var(--r-sm);padding:10px 14px;font-size:13px;display:flex;align-items:center;gap:8px;color:var(--text);max-width:300px;box-shadow:0 4px 20px rgba(0,0,0,.4)}
+.toast-item.ok{border-color:rgba(74,222,128,.3);color:var(--green)}
+.toast-item.err{border-color:rgba(251,113,133,.3);color:var(--rose)}
+</style>
+</head>
+<body>
+<div id="toasts"></div>
+
+<!-- ═══ AUTH SHELL ═══════════════════════════════════════════ -->
+<div id="authShell">
+
+  <!-- Step 1: Phone -->
+  <div class="auth-card anim-slide" id="step1">
+    <div class="auth-logo">
+      <div class="auth-logo-icon" id="authLogoIcon">📚</div>
+      <div>
+        <div class="auth-logo-name" id="authClientName">Loading...</div>
+        <div class="auth-logo-sub">Student Portal</div>
+      </div>
+    </div>
+    <div class="progress">
+      <div class="progress-dot active"></div>
+      <div class="progress-dot"></div>
+    </div>
+    <div class="auth-heading">Let's get you in</div>
+    <div class="auth-sub">Enter your registered mobile number to continue to your courses.</div>
+    <div class="field">
+      <label class="form-label field-label">Mobile number</label>
+      <div class="phone-wrap" id="phoneWrap">
+        <span class="phone-prefix">+91</span>
+        <input class="field-input" id="s1Phone" placeholder="Enter 10-digit number" inputmode="tel" maxlength="10"
+          oninput="this.value=this.value.replace(/\D/g,'').slice(0,10)"
+          onkeydown="if(event.key==='Enter')checkPhone()"
+          onfocus="document.getElementById('phoneWrap').style.borderColor='var(--gold)'"
+          onblur="document.getElementById('phoneWrap').style.borderColor=''">
+      </div>
+    </div>
+    <button class="btn-primary" id="s1Btn" onclick="checkPhone()">
+      <div class="spin" id="s1Spin"></div>
+      <span id="s1Label">Continue →</span>
+    </button>
+    <div class="err-box" id="s1Err"></div>
+  </div>
+
+  <!-- Step 2a: Set PIN (first visit) -->
+  <div class="auth-card anim-slide" id="step2a" style="display:none">
+    <div class="auth-logo">
+      <div class="auth-logo-icon" id="authLogoIcon2a">📚</div>
+      <div><div class="auth-logo-name" id="authClientName2a">Portal</div><div class="auth-logo-sub">Student Portal</div></div>
+    </div>
+    <div class="progress"><div class="progress-dot"></div><div class="progress-dot active"></div></div>
+    <div class="auth-heading">Set your PIN</div>
+    <div class="auth-sub">Welcome! Set a 4-digit PIN for <strong style="color:var(--text)" id="s2aPhone">your number</strong>. You'll use this to log in every time.</div>
+    <div class="field">
+      <label class="field-label">Full name</label>
+      <input class="field-input" id="s2aName" placeholder="Your full name" autocomplete="name">
+    </div>
+    <div class="field">
+      <label class="field-label">Create 4-digit PIN</label>
+      <div class="pin-row" id="setPinRow">
+        <input type="password" class="pin-box" maxlength="1" inputmode="numeric" oninput="pinInput(this,'setPinRow',0)" onkeydown="pinKey(event,this,'setPinRow',0)">
+        <input type="password" class="pin-box" maxlength="1" inputmode="numeric" oninput="pinInput(this,'setPinRow',1)" onkeydown="pinKey(event,this,'setPinRow',1)">
+        <input type="password" class="pin-box" maxlength="1" inputmode="numeric" oninput="pinInput(this,'setPinRow',2)" onkeydown="pinKey(event,this,'setPinRow',2)">
+        <input type="password" class="pin-box" maxlength="1" inputmode="numeric" oninput="pinInput(this,'setPinRow',3)" onkeydown="pinKey(event,this,'setPinRow',3)">
+      </div>
+      <div class="pin-hint"><span>Choose any 4 digits you'll remember</span><button class="pin-toggle" onclick="togglePin('setPinRow',this)">👁 Show PIN</button></div>
+    </div>
+    <button class="btn-primary" id="s2aBtn" onclick="doRegister()">
+      <div class="spin" id="s2aSpin"></div>
+      <span id="s2aLabel">Set PIN &amp; Continue →</span>
+    </button>
+    <div class="err-box" id="s2aErr"></div>
+    <button class="back-link" onclick="showStep('1')">← Back</button>
+  </div>
+
+  <!-- Step 2b: Login with PIN -->
+  <div class="auth-card anim-slide" id="step2b" style="display:none">
+    <div class="auth-logo">
+      <div class="auth-logo-icon" id="authLogoIcon2b">📚</div>
+      <div><div class="auth-logo-name" id="authClientName2b">Portal</div><div class="auth-logo-sub">Student Portal</div></div>
+    </div>
+    <div class="progress"><div class="progress-dot"></div><div class="progress-dot active"></div></div>
+    <div class="auth-heading">Welcome back</div>
+    <div class="auth-sub">Enter your PIN for <strong style="color:var(--text)" id="s2bPhone">your number</strong>.</div>
+    <div class="field">
+      <label class="field-label">Your 4-digit PIN</label>
+      <div class="pin-row" id="loginPinRow">
+        <input type="password" class="pin-box" maxlength="1" inputmode="numeric" oninput="pinInput(this,'loginPinRow',0)" onkeydown="pinKey(event,this,'loginPinRow',0)">
+        <input type="password" class="pin-box" maxlength="1" inputmode="numeric" oninput="pinInput(this,'loginPinRow',1)" onkeydown="pinKey(event,this,'loginPinRow',1)">
+        <input type="password" class="pin-box" maxlength="1" inputmode="numeric" oninput="pinInput(this,'loginPinRow',2)" onkeydown="pinKey(event,this,'loginPinRow',2)">
+        <input type="password" class="pin-box" maxlength="1" inputmode="numeric" oninput="pinInput(this,'loginPinRow',3)" onkeydown="pinKey(event,this,'loginPinRow',3)">
+      </div>
+      <div class="pin-hint"><span></span><button class="pin-toggle" onclick="togglePin('loginPinRow',this)">👁 Show PIN</button></div>
+    </div>
+    <button class="btn-primary" id="s2bBtn" onclick="doLogin()">
+      <div class="spin" id="s2bSpin"></div>
+      <span id="s2bLabel">Login →</span>
+    </button>
+    <div class="err-box" id="s2bErr"></div>
+    <div style="display:flex;justify-content:space-between;margin-top:12px">
+      <button class="back-link" onclick="showStep('1')">← Back</button>
+      <button class="btn-link" onclick="showStep('3')">Forgot PIN?</button>
+    </div>
+  </div>
+
+  <!-- Step 3: Reset PIN -->
+  <div class="auth-card anim-slide" id="step3" style="display:none">
+    <div class="auth-heading" style="margin-bottom:5px">Reset PIN</div>
+    <div class="auth-sub">Number: <strong style="color:var(--text)" id="s3Phone"></strong></div>
+    <div class="field"><label class="field-label">Registered name</label>
+      <input class="field-input" id="s3Name" placeholder="Your full name"></div>
+    <div class="field">
+      <label class="field-label">New 4-digit PIN</label>
+      <div class="pin-row" id="resetPinRow">
+        <input type="password" class="pin-box" maxlength="1" inputmode="numeric" oninput="pinInput(this,'resetPinRow',0)" onkeydown="pinKey(event,this,'resetPinRow',0)">
+        <input type="password" class="pin-box" maxlength="1" inputmode="numeric" oninput="pinInput(this,'resetPinRow',1)" onkeydown="pinKey(event,this,'resetPinRow',1)">
+        <input type="password" class="pin-box" maxlength="1" inputmode="numeric" oninput="pinInput(this,'resetPinRow',2)" onkeydown="pinKey(event,this,'resetPinRow',2)">
+        <input type="password" class="pin-box" maxlength="1" inputmode="numeric" oninput="pinInput(this,'resetPinRow',3)" onkeydown="pinKey(event,this,'resetPinRow',3)">
+      </div>
+    </div>
+    <button class="btn-primary" id="s3Btn" onclick="doReset()">
+      <div class="spin" id="s3Spin"></div>
+      <span id="s3Label">Reset PIN →</span>
+    </button>
+    <div class="err-box" id="s3Err"></div>
+    <button class="back-link" onclick="showStep('2b')">← Back</button>
+  </div>
+</div>
+
+<!-- ═══ DASHBOARD ═════════════════════════════════════════════ -->
+<div id="dashboard">
+  <div class="dash-header">
+    <div class="dash-header-left">
+      <div class="header-logo-icon" id="dashLogoIcon">📚</div>
+      <div class="header-org" id="dashOrgName">Portal</div>
+    </div>
+    <div class="dash-avatar" id="dashAvatar" title="Logout" onclick="doLogout()">?</div>
+  </div>
+
+  <div class="dash-hero">
+    <div class="dash-greeting">Welcome back</div>
+    <div class="dash-name" id="dashName">Student</div>
+    <div class="dash-phone" id="dashPhone"></div>
+  </div>
+
+  <div class="dash-tabs">
+    <button class="dash-tab active" onclick="switchTab('courses')">My Courses</button>
+    <button class="dash-tab" onclick="switchTab('history')">Renewal History</button>
+  </div>
+
+  <!-- Courses tab -->
+  <div class="tab-panel active" id="tab-courses">
+    <div id="allCoursesList"><div class="history-empty"><span class="history-empty-icon">⏳</span><div class="history-empty-text">Loading courses...</div></div></div>
+  </div>
+
+  <!-- History tab -->
+  <div class="tab-panel" id="tab-history">
+    <div id="historyContainer"><div class="history-empty"><span class="history-empty-icon">📋</span><div class="history-empty-text">No history yet</div><div style="font-size:13px;color:var(--text3)">Renewals will appear here.</div></div></div>
+  </div>
+</div>
+
+<!-- ═══ CONFIRM OVERLAY ═══════════════════════════════════════ -->
+<div class="confirm-overlay" id="confirmOverlay">
+  <div class="confirm-sheet">
+    <span class="confirm-type-badge modal-type-renewal" id="modalBadge">Renewal</span>
+    <div class="confirm-title" id="modalTitle">Confirm Renewal</div>
+    <div class="confirm-course" id="modalCourse"></div>
+    <div class="confirm-details">
+      <div class="confirm-row"><span>Current expiry</span><span id="m_oldExpiry"></span></div>
+      <div class="confirm-row"><span>New expiry</span><span id="m_newExpiry"></span></div>
+      <div class="confirm-row"><span>Validity added</span><span id="m_days"></span></div>
+      <div class="confirm-row"><span>Type</span><span id="m_type"></span></div>
+      <div class="confirm-row"><span>Price</span><span id="m_origPrice"></span></div>
+      <div class="confirm-row" id="m_discRow" style="display:none"><span>Coupon discount</span><span style="color:var(--green)" id="m_disc"></span></div>
+      <div class="confirm-row total"><span>Amount payable</span><span id="m_final"></span></div>
+    </div>
+    <div class="coupon-input-area" id="couponInputArea">
+      <div class="coupon-input-row">
+        <input id="couponInput" placeholder="Have a coupon code?" maxlength="20"
+          oninput="this.value=this.value.toUpperCase().replace(/[^A-Z0-9]/g,'')"
+          onkeydown="if(event.key==='Enter')applyCoupon()">
+        <button class="btn-apply" id="couponApplyBtn" onclick="applyCoupon()">Apply</button>
+      </div>
+      <div id="couponErrBox" style="display:none;background:rgba(251,113,133,.07);border:1px solid rgba(251,113,133,.2);border-radius:var(--r-xs);padding:6px 10px;font-size:11px;color:var(--rose)"></div>
+    </div>
+    <div id="couponApplied" style="display:none;margin-bottom:12px">
+      <div class="coupon-success">
+        <span>&#127881; Coupon <strong id="couponCodeLabel"></strong> — saved Rs<span id="couponSavedAmt">0</span></span>
+        <button class="btn-remove-coupon" onclick="removeCoupon()">&#10005; Remove</button>
+      </div>
+    </div>
+    <div class="confirm-actions">
+      <button class="btn-confirm-secondary" onclick="closeConfirm()">Cancel</button>
+      <button class="btn-confirm-primary" id="btnConfirm" onclick="submitRequest()">
+        <div class="confirm-spin" id="confirmSpin"></div>
+        <span id="btnConfirmLabel">Confirm Renewal</span>
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ SUCCESS OVERLAY ═══════════════════════════════════════ -->
+<div class="success-overlay" id="successOverlay">
+  <div class="success-card">
+    <div class="success-icon">&#127881;</div>
+    <div class="success-title" id="successTitle">Done!</div>
+    <div class="success-msg" id="successMsg"></div>
+    <div class="success-details" id="successDetails"></div>
+    <button class="btn-renew" onclick="closeSuccess()">Back to my courses</button>
+  </div>
+</div>
+
+<script>
+// ══════════════════════════════════════════════════════════════
+//  EduRenew Student Portal v2.0
+// ══════════════════════════════════════════════════════════════
+var SK = { PHONE:'er_phone', TOKEN:'er_token', NAME:'er_name', EXPIRY:'er_expiry' };
+var app = { phone:null, token:null, studentName:null, pending:null, activeCoupon:null, cfg:{} };
+
+function norm(p){ return p.toString().replace(/\D/g,'').slice(-10); }
+
+// ── Boot ──────────────────────────────────────────────────────
+window.addEventListener('DOMContentLoaded', function() {
+  // Load client config first
+  google.script.run
+    .withSuccessHandler(function(cfg) {
+      app.cfg = cfg || {};
+      applyConfig(cfg);
+      restoreSession();
+    })
+    .withFailureHandler(function() { restoreSession(); })
+    .getClientConfig();
+});
+
+function applyConfig(cfg) {
+  if (!cfg) return;
+  var c = cfg.primaryColor || '#f5c842';
+  document.documentElement.style.setProperty('--gold', c);
+  document.documentElement.style.setProperty('--gold2', c);
+  var emoji = cfg.logoEmoji || '📚';
+  var name  = cfg.name || 'Student Portal';
+  ['authLogoIcon','authLogoIcon2a','authLogoIcon2b','dashLogoIcon'].forEach(function(id){
+    var el=document.getElementById(id); if(el) el.textContent=emoji;
+  });
+  ['authClientName','authClientName2a','authClientName2b','dashOrgName'].forEach(function(id){
+    var el=document.getElementById(id); if(el) el.textContent=name;
+  });
+}
+
+function restoreSession() {
+  var phone  = localStorage.getItem(SK.PHONE);
+  var token  = localStorage.getItem(SK.TOKEN);
+  var expiry = parseInt(localStorage.getItem(SK.EXPIRY)||'0');
+  if (phone && token && expiry > Date.now()) {
+    app.phone = norm(phone); app.token = token;
+    app.studentName = localStorage.getItem(SK.NAME)||'';
+    loadStudentData(app.phone);
+  } else {
+    clearSession(); showStep('1');
+  }
+}
+
+// ── Steps ─────────────────────────────────────────────────────
+function showStep(s) {
+  ['1','2a','2b','3'].forEach(function(x){
+    var el=document.getElementById('step'+x);
+    if(el) el.style.display='none';
+  });
+  var t=document.getElementById('step'+s);
+  if(t){ t.style.display='block'; t.className='auth-card anim-slide'; }
+  document.getElementById('authShell').style.display='flex';
+  document.getElementById('dashboard').classList.remove('visible');
+}
+
+// ── Step 1: Check phone ───────────────────────────────────────
+function checkPhone() {
+  var digits = document.getElementById('s1Phone').value.replace(/\D/g,'');
+  if (digits.length!==10) { showErr('s1Err','Enter your 10-digit mobile number'); return; }
+  app.phone = digits;
+  document.getElementById('s1Err').style.display='none';
+  setBtnLoad('s1Btn','s1Spin','s1Label',true,'Checking...');
+
+  google.script.run
+    .withSuccessHandler(function(res) {
+      setBtnLoad('s1Btn','s1Spin','s1Label',false,'Continue →');
+      if (!res || !res.success) {
+        // Show error but still route — could be sheet config issue
+        showErr('s1Err',(res&&res.error)||'Could not verify. Please try again.');
+        // After 2s try routing to register
+        setTimeout(function(){
+          document.getElementById('s2aPhone').textContent='+91 '+digits;
+          document.getElementById('s2aName').value='';
+          clearPinRow('setPinRow');
+          document.getElementById('s2aErr').style.display='none';
+          showStep('2a');
+        }, 2000);
+        return;
+      }
+      if (res.hasPin) {
+        document.getElementById('s2bPhone').textContent='+91 '+digits;
+        clearPinRow('loginPinRow');
+        document.getElementById('s2bErr').style.display='none';
+        showStep('2b');
+        setTimeout(function(){focusPinRow('loginPinRow');},150);
+      } else {
+        document.getElementById('s2aPhone').textContent='+91 '+digits;
+        document.getElementById('s2aName').value=res.customerName||'';
+        clearPinRow('setPinRow');
+        document.getElementById('s2aErr').style.display='none';
+        showStep('2a');
+      }
+    })
+    .withFailureHandler(function(e){
+      setBtnLoad('s1Btn','s1Spin','s1Label',false,'Continue →');
+      showErr('s1Err','Server error: '+(e.message||e));
+    })
+    .checkStudentPhone(digits);
+}
+
+// ── Step 2a: Set PIN ──────────────────────────────────────────
+function doRegister() {
+  var name=document.getElementById('s2aName').value.trim();
+  var pin=getPinValue('setPinRow');
+  if (!name)         { showErr('s2aErr','Please enter your full name'); return; }
+  if (pin.length!==4){ showErr('s2aErr','Enter all 4 digits of your PIN'); return; }
+  setBtnLoad('s2aBtn','s2aSpin','s2aLabel',true,'Saving PIN...');
+
+  google.script.run
+    .withSuccessHandler(function(res){
+      setBtnLoad('s2aBtn','s2aSpin','s2aLabel',false,'Set PIN & Continue →');
+      if (!res||!res.success){ showErr('s2aErr',(res&&res.error)||'Could not save PIN'); return; }
+      saveSession('token-'+Date.now(), res.customerName||name);
+      loadStudentData(app.phone);
+    })
+    .withFailureHandler(function(e){ setBtnLoad('s2aBtn','s2aSpin','s2aLabel',false,'Set PIN & Continue →'); showErr('s2aErr','Server error: '+(e.message||e)); })
+    .saveStudentPin(app.phone, name, pin);
+}
+
+// ── Step 2b: Login ────────────────────────────────────────────
+function doLogin() {
+  var pin=getPinValue('loginPinRow');
+  if (pin.length!==4){ showErr('s2bErr','Enter your 4-digit PIN'); return; }
+  setBtnLoad('s2bBtn','s2bSpin','s2bLabel',true,'Logging in...');
+
+  google.script.run
+    .withSuccessHandler(function(res){
+      setBtnLoad('s2bBtn','s2bSpin','s2bLabel',false,'Login →');
+      if (!res||!res.success){ showErr('s2bErr',res?res.error:'Server error'); clearPinRow('loginPinRow'); return; }
+      saveSession('token-'+Date.now(), res.customerName||'');
+      loadStudentData(app.phone);
+    })
+    .withFailureHandler(function(e){ setBtnLoad('s2bBtn','s2bSpin','s2bLabel',false,'Login →'); showErr('s2bErr','Server error: '+(e.message||e)); })
+    .verifyStudentPin(app.phone, pin);
+}
+
+// ── Step 3: Reset PIN ─────────────────────────────────────────
+function doReset() {
+  var name=document.getElementById('s3Name').value.trim();
+  var pin=getPinValue('resetPinRow');
+  if (!name)         { showErr('s3Err','Please enter your full name'); return; }
+  if (pin.length!==4){ showErr('s3Err','Enter all 4 digits of your new PIN'); return; }
+  setBtnLoad('s3Btn','s3Spin','s3Label',true,'Resetting...');
+
+  google.script.run
+    .withSuccessHandler(function(res){
+      setBtnLoad('s3Btn','s3Spin','s3Label',false,'Reset PIN →');
+      if (!res||!res.success){ showErr('s3Err',(res&&res.error)||'Reset failed'); return; }
+      saveSession('token-'+Date.now(), res.customerName||name);
+      showToast('PIN reset successfully!','ok');
+      loadStudentData(app.phone);
+    })
+    .withFailureHandler(function(e){ setBtnLoad('s3Btn','s3Spin','s3Label',false,'Reset PIN →'); showErr('s3Err','Error: '+(e.message||e)); })
+    .saveStudentPin(app.phone, name, pin);
+}
+
+// ── Session ───────────────────────────────────────────────────
+function saveSession(token, name) {
+  app.token=token; app.studentName=name;
+  localStorage.setItem(SK.PHONE, app.phone);
+  localStorage.setItem(SK.TOKEN, token);
+  localStorage.setItem(SK.NAME, name);
+  localStorage.setItem(SK.EXPIRY, String(Date.now()+7*24*60*60*1000));
+}
+function clearSession() {
+  app.phone=null; app.token=null; app.studentName=null;
+  Object.values(SK).forEach(function(k){ localStorage.removeItem(k); });
+}
+function doLogout() {
+  clearSession();
+  document.getElementById('dashboard').classList.remove('visible');
+  document.getElementById('s1Phone').value='';
+  showStep('1');
+}
+
+// ── Load data ─────────────────────────────────────────────────
+function loadStudentData(phone) {
+  phone = norm(phone);
+  document.getElementById('authShell').style.display='none';
+  document.getElementById('dashboard').classList.add('visible');
+
+  var name = app.studentName||'Student';
+  document.getElementById('dashAvatar').textContent  = (name[0]||'?').toUpperCase();
+  document.getElementById('dashName').textContent    = name;
+  document.getElementById('dashPhone').textContent   = '📱 +91 '+phone;
+  document.getElementById('allCoursesList').innerHTML = spinner('Loading your courses...');
+  document.getElementById('historyContainer').innerHTML = spinner('Loading history...');
+  switchTab('courses');
+
+  // Fetch active coupon in parallel
+  app.activeCoupon = null;
+  google.script.run
+    .withSuccessHandler(function(cr){ if(cr&&cr.success&&cr.coupon) app.activeCoupon=cr.coupon; })
+    .withFailureHandler(function(){})
+    .getActiveCouponForStudent();
+
+  // Fetch courses
+  google.script.run
+    .withSuccessHandler(function(res){
+      if (!res||!res.success) {
+        document.getElementById('allCoursesList').innerHTML=errBox((res&&res.error)||'Could not load courses');
+        return;
+      }
+      if (res.customerName&&res.customerName.trim()) {
+        var n=res.customerName.trim();
+        document.getElementById('dashName').textContent=n;
+        document.getElementById('dashAvatar').textContent=(n[0]||'?').toUpperCase();
+        app.studentName=n; localStorage.setItem(SK.NAME,n);
+      }
+      renderCourses(res.courses||[]);
+    })
+    .withFailureHandler(function(e){ document.getElementById('allCoursesList').innerHTML=errBox('Server error: '+(e.message||e)); })
+    .searchUser(phone);
+
+  // Fetch history
+  google.script.run
+    .withSuccessHandler(function(res){ renderHistory((res&&res.success)?(res.history||[]):[]);})
+    .withFailureHandler(function(){ renderHistory([]); })
+    .getRenewalHistory(phone);
+}
+
+// ── Render courses ────────────────────────────────────────────
+function renderCourses(rawCourses) {
+  if (!rawCourses.length) {
+    document.getElementById('allCoursesList').innerHTML=emptyState('📖','No courses purchased yet','Your enrolled courses will appear here.');
+    return;
+  }
+  var cfg = app.cfg || {};
+  var pre  = cfg.renewWindowPre  || 15;
+  var post = cfg.renewWindowPost || 15;
+  var courses = rawCourses.map(function(c) {
+    var days     = typeof c.daysRemaining==='number' ? c.daysRemaining : 0;
+    var expired  = !!c.isExpired;
+    var daysAfter= expired ? Math.abs(days) : 0;
+    // Renewal window: pre days before expiry OR post days after
+    var inWindow = expired ? daysAfter<=post : (days>=0&&days<=pre);
+    c._inWindow  = inWindow;
+    c._activeCoupon = inWindow ? app.activeCoupon : null;
+    return c;
+  });
+
+  document.getElementById('allCoursesList').innerHTML = courses.map(function(c){ return courseCard(c); }).join('');
+}
+
+function courseCard(c) {
+  var days    = c.daysRemaining||0;
+  var expired = !!c.isExpired;
+  var inWin   = !!c._inWindow;
+  var coupon  = c._activeCoupon;
+
+  var statusClass, statusText;
+  if (expired)      { statusClass='status-expired';  statusText='Expired '+Math.abs(days)+'d ago'; }
+  else if (inWin)   { statusClass='status-expiring'; statusText='Expires in '+days+'d'; }
+  else              { statusClass='status-active';   statusText='Active · '+days+'d left'; }
+  var accent = expired?'var(--rose)':inWin?'var(--amber)':'var(--teal)';
+
+  var couponBanner='', windowBanner='', actions='';
+
+  if (inWin) {
+    windowBanner='<div class="renew-window">&#9203; '+(expired?'Expired '+Math.abs(days)+'d ago — renew to restore access':'Expiring in '+days+' days — renew to keep access')+'</div>';
+  }
+
+  if (inWin && coupon) {
+    var discLabel = coupon.discountType==='PERCENT'
+      ? coupon.discountValue+'% off'
+      : 'Rs'+Number(coupon.discountValue).toLocaleString('en-IN')+' off';
+    couponBanner='<div class="coupon-card-banner">&#127881;<span>Offer: <strong>'+esc(coupon.couponCode)+'</strong> ('+discLabel+') — auto-applied when you renew</span></div>';
+
+    if (c.courseUrl) {
+      // Redirect to course purchase page with coupon pre-applied
+      var sep = c.courseUrl.indexOf('?')>=0?'&':'?';
+      var url = c.courseUrl+sep+'coupon='+encodeURIComponent(coupon.couponCode)+'&utm_source=renewal_portal';
+      actions='<a href="'+url+'" target="_blank" rel="noopener" style="text-decoration:none">'
+        +'<button class="btn-renew">&#128260; Renew Now — '+esc(coupon.couponCode)+' applied</button></a>';
+    } else {
+      // No courseUrl — use internal confirm flow
+      var safeData = esc(JSON.stringify(c).replace(/'/g,"&#39;"));
+      actions='<button class="btn-renew" data-c=\''+JSON.stringify(c).replace(/'/g,"&#39;")+'\' onclick="openConfirmFromBtn(this,\'RENEWAL\')">&#128260; Renew Now</button>';
+    }
+  } else if (inWin) {
+    // In window but no active coupon
+    if (c.courseUrl) {
+      actions='<a href="'+esc(c.courseUrl)+'" target="_blank" rel="noopener" style="text-decoration:none">'
+        +'<button class="btn-renew">&#128260; Renew Course</button></a>';
+    } else {
+      actions='<button class="btn-renew" data-c=\''+JSON.stringify(c).replace(/'/g,"&#39;")+'\' onclick="openConfirmFromBtn(this,\'RENEWAL\')">&#128260; Renew Course</button>';
+    }
+  } else {
+    // Not in renewal window
+    var daysUntilWindow = !expired ? Math.max(0, days - (app.cfg.renewWindowPre||15)) : 0;
+    actions='<div class="locked-msg">&#128274; '+(daysUntilWindow>0?'Renewal opens in '+daysUntilWindow+'d':'Not in renewal window')+'</div>';
+  }
+
+  return '<div class="course-card" style="--card-accent:'+accent+'">'
+    +'<div class="course-card-top">'
+    +'<div><div class="course-name">'+esc(c.course)+'</div>'+(c.orgName?'<div class="course-org">'+esc(c.orgName)+'</div>':'')+'</div>'
+    +'<span class="'+statusClass+' status-pill">'+statusText+'</span>'
+    +'</div>'
+    +couponBanner+windowBanner
+    +'<div class="course-meta">'
+    +'<div><div class="meta-label">Purchased</div><div class="meta-value">'+esc(c.purchaseDate||'—')+'</div></div>'
+    +'<div><div class="meta-label">Expires</div><div class="meta-value '+(expired?'':'highlight')+'">'+esc(c.expiryDate||'—')+'</div></div>'
+    +'<div><div class="meta-label">Paid</div><div class="meta-value">Rs'+fmtN(c.amount)+'</div></div>'
+    +'</div>'
+    +'<div class="course-actions">'+actions+'</div>'
+    +'</div>';
+}
+
+// ── Confirm (internal flow, when no courseUrl) ────────────────
+function openConfirmFromBtn(btn, type) {
+  var c = JSON.parse(btn.dataset.c.replace(/&#39;/g,"'"));
+  openConfirm(c, type);
+}
+
+function openConfirm(c, type) {
+  var validityDays=365;
+  var origPrice=c.amount||0;
+  var base=type==='RENEWAL'&&c.isExpired?new Date():new Date(c.expiryDate);
+  var newExp=new Date(base); newExp.setDate(newExp.getDate()+validityDays);
+
+  app.pending = { course:c, type:type, originalPrice:origPrice, discountAmt:0, finalAmt:origPrice, validityDays:validityDays, newExpiry:newExp, coupon:null };
+
+  document.getElementById('modalBadge').textContent  = type==='RENEWAL'?'Renewal':'Extension';
+  document.getElementById('modalBadge').className    = 'confirm-type-badge modal-type-'+(type==='RENEWAL'?'renewal':'extension');
+  document.getElementById('modalTitle').textContent  = type==='RENEWAL'?'Confirm Renewal':'Confirm Extension';
+  document.getElementById('modalCourse').textContent = c.course;
+  document.getElementById('m_oldExpiry').textContent = c.expiryDate||'—';
+  document.getElementById('m_newExpiry').textContent = fmtDate(newExp);
+  document.getElementById('m_days').textContent      = '+'+validityDays+' days';
+  document.getElementById('m_type').textContent      = type;
+  document.getElementById('m_origPrice').textContent = 'Rs'+fmtN(origPrice);
+  document.getElementById('m_final').textContent     = 'Rs'+fmtN(origPrice);
+  document.getElementById('m_discRow').style.display = 'none';
+  document.getElementById('couponInput').value='';
+  document.getElementById('couponApplied').style.display='none';
+  document.getElementById('couponInputArea').style.display='';
+  document.getElementById('couponErrBox').style.display='none';
+  document.getElementById('btnConfirmLabel').textContent=type==='RENEWAL'?'Confirm Renewal':'Confirm Extension';
+  document.getElementById('confirmOverlay').classList.add('open');
+
+  // If there's an active coupon, pre-fill it
+  if (app.activeCoupon && c._inWindow) {
+    document.getElementById('couponInput').value=app.activeCoupon.couponCode;
+  }
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+
+function closeConfirm() { document.getElementById('confirmOverlay').classList.remove('open'); }
+
+function applyCoupon() {
+  var code=document.getElementById('couponInput').value.trim().toUpperCase();
+  if (!code) { showCouponErr('Enter a coupon code'); return; }
+  var p=app.pending;
+  document.getElementById('couponApplyBtn').textContent='...';
+  document.getElementById('couponApplyBtn').disabled=true;
+  document.getElementById('couponErrBox').style.display='none';
+
+  google.script.run
+    .withSuccessHandler(function(res){
+      document.getElementById('couponApplyBtn').textContent='Apply';
+      document.getElementById('couponApplyBtn').disabled=false;
+      if (!res||!res.success){ showCouponErr(res?res.error:'Could not validate coupon'); return; }
+      p.coupon=res; p.discountAmt=res.discountAmount; p.finalAmt=p.originalPrice-res.discountAmount;
+      document.getElementById('m_discRow').style.display='';
+      document.getElementById('m_disc').textContent='-Rs'+fmtN(res.discountAmount);
+      document.getElementById('m_final').textContent='Rs'+fmtN(p.finalAmt);
+      document.getElementById('couponCodeLabel').textContent=res.couponCode;
+      document.getElementById('couponSavedAmt').textContent=fmtN(res.discountAmount);
+      document.getElementById('couponApplied').style.display='';
+      document.getElementById('couponInputArea').style.display='none';
+      showToast('Coupon '+res.couponCode+' applied! Save Rs'+fmtN(res.discountAmount),'ok');
+    })
+    .withFailureHandler(function(e){ document.getElementById('couponApplyBtn').textContent='Apply'; document.getElementById('couponApplyBtn').disabled=false; showCouponErr('Error: '+(e.message||e)); })
+    .validateCoupon(code, app.phone, p.originalPrice, p.type, p.course.course);
+}
+
+function removeCoupon() {
+  var p=app.pending;
+  p.coupon=null; p.discountAmt=0; p.finalAmt=p.originalPrice;
+  document.getElementById('couponInput').value='';
+  document.getElementById('couponApplied').style.display='none';
+  document.getElementById('couponInputArea').style.display='';
+  document.getElementById('m_discRow').style.display='none';
+  document.getElementById('m_final').textContent='Rs'+fmtN(p.originalPrice);
+}
+
+function showCouponErr(msg){ var el=document.getElementById('couponErrBox'); el.textContent='⚠ '+msg; el.style.display=''; }
+
+function submitRequest() {
+  var p=app.pending; if(!p) return;
+  document.getElementById('btnConfirm').disabled=true;
+  document.getElementById('confirmSpin').style.display='block';
+  var body={
+    phone:app.phone, course:p.course.course, entryType:p.type,
+    amount:p.originalPrice,
+    couponCode:p.coupon?p.coupon.couponCode:'',
+    discountAmount:p.coupon?p.coupon.discountAmount:0,
+    couponRowIndex:p.coupon?p.coupon.rowIndex:null,
+    newExpiryDate:fmtDate(p.newExpiry), oldExpiryDate:p.course.expiryDate,
+    processedBy:'student-portal', notes:p.coupon?'Coupon: '+p.coupon.couponCode:'Student portal request',
+    parentTxnId:p.course.transactionId||''
+  };
+  google.script.run
+    .withSuccessHandler(function(res){
+      document.getElementById('btnConfirm').disabled=false;
+      document.getElementById('confirmSpin').style.display='none';
+      closeConfirm();
+      if (!res||!res.success){ showToast((res&&res.error)||'Request failed','err'); return; }
+      showSuccess({
+        transactionId:res.transactionId, courseName:p.course.course, requestType:p.type,
+        oldExpiryDate:p.course.expiryDate, newExpiryDate:res.newExpiryDate,
+        daysAdded:res.daysExtended, originalPrice:p.originalPrice,
+        discountAmount:p.coupon?p.coupon.discountAmount:0, amountPaid:res.amountPaid,
+        message:p.type+' confirmed! New expiry: '+res.newExpiryDate
+      });
+      loadStudentData(app.phone);
+    })
+    .withFailureHandler(function(e){
+      document.getElementById('btnConfirm').disabled=false;
+      document.getElementById('confirmSpin').style.display='none';
+      closeConfirm(); showToast('Error: '+(e.message||e),'err');
+    })
+    .processRenewal(body);
+}
+
+function showSuccess(d) {
+  document.getElementById('successTitle').textContent=d.requestType==='RENEWAL'?'Renewed!':'Extended!';
+  document.getElementById('successMsg').textContent=d.message;
+  var rows=[['Transaction ID',d.transactionId],['Course',d.courseName],['Old expiry',d.oldExpiryDate],['New expiry',d.newExpiryDate],['Days added','+'+d.daysAdded+' days']];
+  if (d.discountAmount>0) rows.push(['You saved','Rs'+fmtN(d.discountAmount)]);
+  rows.push(['Amount payable','Rs'+fmtN(d.amountPaid)]);
+  document.getElementById('successDetails').innerHTML=rows.map(function(r){
+    return '<div class="success-detail-row"><span class="lbl">'+esc(r[0])+'</span><span>'+esc(String(r[1]))+'</span></div>';
+  }).join('');
+  document.getElementById('successOverlay').classList.add('open');
+}
+function closeSuccess(){ document.getElementById('successOverlay').classList.remove('open'); switchTab('courses'); }
+
+// ── History ───────────────────────────────────────────────────
+function renderHistory(history) {
+  var el=document.getElementById('historyContainer');
+  if (!history.length) { el.innerHTML='<div class="history-empty"><span class="history-empty-icon">📋</span><div class="history-empty-text">No history yet</div><div style="font-size:13px;color:var(--text3)">Renewals will appear here.</div></div>'; return; }
+  el.innerHTML='<div class="history-list">'+history.map(function(h){
+    var type=(h.RenewalType||'').toLowerCase();
+    return '<div class="history-item"><div class="history-dot '+type+'"></div>'
+      +'<div style="flex:1"><div class="history-row1"><span class="history-course">'+esc(h.Course||'')+'</span>'
+      +'<span class="history-pill '+type+'">'+(type==='renewal'?'Renewal':'Extension')+'</span></div>'
+      +'<div class="history-dates">&#128197; '+esc(h.OldExpiryDate||'')+' → '+esc(h.NewExpiryDate||'')+' · +'+(h.DaysExtended||0)+'d</div>'
+      +'<div class="history-amount">Paid: <strong>Rs'+fmtN(h.AmountPaid||0)+'</strong>'+(Number(h.DiscountGiven)>0?' · Saved Rs'+fmtN(h.DiscountGiven):'')
+      +' <span style="color:var(--text3)">'+esc((h.Timestamp||'').toString().slice(0,10))+'</span></div>'
+      +'</div></div>';
+  }).join('')+'</div>';
+}
+
+// ── Tab switcher ──────────────────────────────────────────────
+function switchTab(tab) {
+  document.querySelectorAll('.tab-panel').forEach(function(p){p.classList.remove('active');});
+  document.querySelectorAll('.dash-tab').forEach(function(t){t.classList.remove('active');});
+  document.getElementById('tab-'+tab).classList.add('active');
+  var tabs=['courses','history'];
+  var idx=tabs.indexOf(tab);
+  if (idx>=0) document.querySelectorAll('.dash-tab')[idx].classList.add('active');
+}
+
+// ── PIN helpers ───────────────────────────────────────────────
+function pinInput(el,rowId,idx){
+  var v=el.value.replace(/\D/g,''); el.value=v?v[0]:''; el.classList.toggle('filled',!!el.value);
+  if(el.value){ var b=document.getElementById(rowId).querySelectorAll('.pin-box'); if(idx<3)b[idx+1].focus(); else{el.blur();if(rowId==='loginPinRow')doLogin();} }
+}
+function pinKey(e,el,rowId,idx){
+  if(e.key==='Backspace'&&!el.value){ var b=document.getElementById(rowId).querySelectorAll('.pin-box'); if(idx>0){b[idx-1].value='';b[idx-1].classList.remove('filled');b[idx-1].focus();} }
+}
+function getPinValue(rowId){ return Array.from(document.getElementById(rowId).querySelectorAll('.pin-box')).map(function(b){return b.value;}).join(''); }
+function clearPinRow(rowId){ document.getElementById(rowId).querySelectorAll('.pin-box').forEach(function(b){b.value='';b.classList.remove('filled');}); }
+function focusPinRow(rowId){ var b=document.getElementById(rowId).querySelector('.pin-box'); if(b)b.focus(); }
+function togglePin(rowId,btn){ var b=document.getElementById(rowId).querySelectorAll('.pin-box'); var h=b[0].type!=='text'; b.forEach(function(x){x.type=h?'text':'password';}); btn.textContent=h?'🙈 Hide PIN':'👁 Show PIN'; }
+
+// ── UI helpers ────────────────────────────────────────────────
+function showErr(id,msg){ var el=document.getElementById(id); el.textContent='⚠ '+msg; el.style.display='block'; }
+function setBtnLoad(btnId,spinId,labelId,on,label){ document.getElementById(btnId).disabled=on; document.getElementById(spinId).style.display=on?'block':'none'; document.getElementById(labelId).textContent=label; }
+function showToast(msg,type){
+  var t=document.createElement('div'); t.className='toast-item '+(type||'ok');
+  t.innerHTML='<span>'+(type==='ok'?'✓':'✕')+'</span><span>'+esc(msg)+'</span>';
+  document.getElementById('toasts').appendChild(t);
+  setTimeout(function(){t.style.opacity='0';t.style.transition='opacity .3s';setTimeout(function(){t.remove();},300);},4000);
+}
+function spinner(msg){ return '<div style="padding:44px;text-align:center;color:var(--text3)"><div style="width:24px;height:24px;border:2px solid rgba(245,200,66,.15);border-top-color:var(--gold);border-radius:50%;animation:rotate .7s linear infinite;margin:0 auto 12px"></div><div style="font-size:12px">'+esc(msg)+'</div></div>'; }
+function errBox(msg){ return '<div style="padding:16px;color:var(--rose);font-size:13px;background:var(--rose-bg);border:1px solid rgba(251,113,133,.2);border-radius:var(--r);margin:8px 0">⚠ '+esc(msg)+'</div>'; }
+function emptyState(icon,title,sub){ return '<div class="history-empty"><span class="history-empty-icon">'+icon+'</span><div class="history-empty-text">'+title+'</div><div style="font-size:13px;color:var(--text3)">'+sub+'</div></div>'; }
+function fmtN(n){ return Number(n||0).toLocaleString('en-IN'); }
+function fmtDate(d){ if(!d)return''; var dt=d instanceof Date?d:new Date(d); if(isNaN(dt))return''; return dt.toISOString().split('T')[0]; }
+function esc(s){ var d=document.createElement('div');d.textContent=s;return d.innerHTML; }
+</script>
+</body>
+</html>
