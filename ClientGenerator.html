@@ -455,10 +455,13 @@ function testApi(){
   setStatus('loading','<div class="spin-sm"></div>&nbsp;Validating inputs...');
   btn.disabled=true;
   setTimeout(function(){
-    btn.disabled=false;
-    var url=buildApiUrl();
-    setStatus('ok','&#10003; Inputs valid. Script will fetch this URL every hour:<br><span style="font-size:10px;opacity:.8;word-break:break-all">'+esc(url.replace(key,'***'+key.slice(-4)))+'</span>');
-  },600);
+    document.getElementById('codeOut').textContent = code;
+    document.getElementById('shellOut').textContent = shellHtml;
+    document.getElementById('output').style.display = 'block';
+    btn.disabled = false;
+    btn.innerHTML = '<svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="4 17 10 11 4 5"/><line x1="12" y1="19" x2="20" y2="19"/></svg> Generate Code.gs';
+    document.getElementById('output').scrollIntoView({behavior:'smooth', block:'start'});
+  }, 300);
 }
 function setStatus(t,h){ var el=document.getElementById('apiStatus'); el.className='api-status '+t; el.innerHTML=h; }
 
