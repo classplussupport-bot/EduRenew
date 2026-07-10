@@ -1220,7 +1220,7 @@ function onWebAppUrlInput(val){
   if(!val||val.indexOf('script.google.com')<0){
     preview.style.display='none';saveBtn.style.display='none';copyBtn.style.display='none';return;
   }
-  var base=val.replace(/[?#].*/,'').replace(/\/+$/,'');
+  var base=val.replace(/[?#].*/,'').replace(/\/+$/,'').replace(/\/exec$/i,'');
   document.getElementById('adminUrlPreview').textContent=base+'/exec';
   document.getElementById('studentUrlPreview').textContent=base+'/exec?page=student';
   preview.style.display='block';saveBtn.style.display='flex';copyBtn.style.display='flex';
@@ -1245,7 +1245,7 @@ function saveClient(){
   if(!webAppUrl){setMasterStatus('err','Paste the Web App URL first');return;}
   if(!window._genData){setMasterStatus('err','Generate a Code.gs first (Phase 1)');return;}
   var d=window._genData;
-  var base=webAppUrl.replace(/[?#].*/,'').replace(/\/+$/,'');
+  var base=webAppUrl.replace(/[?#].*/,'').replace(/\/+$/,'').replace(/\/exec$/i,'');
   var adminUrl=base+'/exec';
   var studentUrl=base+'/exec?page=student';
   var date=new Date().toISOString().slice(0,10);
