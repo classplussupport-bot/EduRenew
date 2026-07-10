@@ -1,0 +1,1106 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>My Courses — Student Portal</title>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Lora:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#0f0f1a; --bg2:#16162a; --bg3:#1e1e35;
+  --card:#1a1a2e; --card2:#212140;
+  --border:rgba(255,255,255,.08); --border2:rgba(255,255,255,.14);
+  --text:#f0f0ff; --text2:#a0a0c8; --text3:#6060a0;
+  --gold:#f5c842; --gold2:#ffeaa0; --gold-bg:rgba(245,200,66,.1);
+  --teal:#2dd4bf; --teal-bg:rgba(45,212,191,.1);
+  --rose:#fb7185; --rose-bg:rgba(251,113,133,.1);
+  --green:#4ade80; --green-bg:rgba(74,222,128,.1);
+  --amber:#fbbf24; --amber-bg:rgba(251,191,36,.1);
+  --font:'Plus Jakarta Sans',sans-serif; --font-serif:'Lora',serif;
+  --r:16px; --r-sm:10px; --r-xs:6px;
+  --shadow:0 4px 24px rgba(0,0,0,.4); --shadow-lg:0 12px 48px rgba(0,0,0,.6);
+}
+html{font-family:var(--font);background:var(--bg);color:var(--text);min-height:100vh}
+body{min-height:100vh}
+
+/* ── Auth Shell ─────────────────────────────────────────── */
+.auth-shell{min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:24px;position:relative;overflow:hidden}
+.glow{position:absolute;border-radius:50%;pointer-events:none}
+.glow1{width:600px;height:600px;background:radial-gradient(circle,rgba(245,200,66,.1) 0%,transparent 70%);top:-120px;left:50%;transform:translateX(-50%)}
+.glow2{width:400px;height:400px;background:radial-gradient(circle,rgba(45,212,191,.07) 0%,transparent 70%);bottom:-80px;right:-80px}
+
+.auth-card{background:var(--card);border:1px solid var(--border2);border-radius:24px;padding:40px 36px;width:100%;max-width:400px;box-shadow:var(--shadow-lg);position:relative;z-index:1}
+
+@keyframes fadeUp{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
+@keyframes fadeIn{from{opacity:0}to{opacity:1}}
+@keyframes slideLeft{from{opacity:0;transform:translateX(24px)}to{opacity:1;transform:translateX(0)}}
+.anim-up{animation:fadeUp .4s ease both}
+.anim-slide{animation:slideLeft .3s ease both}
+
+/* Logo */
+.logo{display:flex;align-items:center;gap:12px;margin-bottom:28px}
+.logo-icon{width:44px;height:44px;border-radius:12px;background:linear-gradient(135deg,var(--gold),#e6a820);display:grid;place-items:center;font-size:20px;box-shadow:0 4px 16px rgba(245,200,66,.3)}
+.logo-name{font-size:20px;font-weight:800;letter-spacing:-.4px}
+.logo-sub{font-size:11px;color:var(--text2);margin-top:1px}
+
+/* Step header */
+.step-back{display:inline-flex;align-items:center;gap:6px;font-size:13px;color:var(--text2);cursor:pointer;margin-bottom:20px;transition:color .15s;background:none;border:none;font-family:var(--font);padding:0}
+.step-back:hover{color:var(--text)}
+.step-title{font-family:var(--font-serif);font-size:24px;font-weight:600;line-height:1.3;margin-bottom:6px}
+.step-sub{font-size:14px;color:var(--text2);line-height:1.6;margin-bottom:24px}
+
+/* Phone display chip */
+.phone-chip{display:inline-flex;align-items:center;gap:7px;background:var(--bg3);border:1px solid var(--border2);border-radius:20px;padding:6px 12px;font-size:13px;font-weight:600;margin-bottom:20px}
+.phone-chip-icon{font-size:14px}
+
+/* Field */
+.field{margin-bottom:18px}
+.field-label{display:block;font-size:12px;font-weight:600;color:var(--text2);letter-spacing:.5px;margin-bottom:8px;text-transform:uppercase}
+.field-input{width:100%;padding:13px 16px;background:var(--bg3);border:1.5px solid var(--border2);border-radius:var(--r-sm);color:var(--text);font-family:var(--font);font-size:15px;outline:none;transition:border .15s,box-shadow .15s}
+.field-input:focus{border-color:var(--gold);box-shadow:0 0 0 3px rgba(245,200,66,.12)}
+.field-input::placeholder{color:var(--text3)}
+
+/* PIN boxes */
+.pin-row{display:flex;gap:12px;justify-content:center;margin-bottom:8px}
+.pin-box{width:56px;height:64px;background:var(--bg3);border:2px solid var(--border2);border-radius:var(--r-sm);color:var(--text);font-size:28px;font-weight:700;text-align:center;font-family:var(--font);outline:none;transition:border .15s,box-shadow .15s;caret-color:var(--gold)}
+.pin-box:focus{border-color:var(--gold);box-shadow:0 0 0 3px rgba(245,200,66,.12)}
+.pin-box.filled{border-color:rgba(245,200,66,.4)}
+.pin-hint{text-align:center;font-size:12px;color:var(--text3);margin-bottom:20px}
+
+/* Toggle visibility */
+.pin-toggle{display:flex;align-items:center;justify-content:center;gap:6px;font-size:12px;color:var(--text3);cursor:pointer;margin-bottom:20px;background:none;border:none;font-family:var(--font);transition:color .15s}
+.pin-toggle:hover{color:var(--text2)}
+
+/* Primary button */
+.btn-primary{width:100%;padding:14px;background:linear-gradient(135deg,var(--gold),#e6a820);color:#0f0f1a;font-family:var(--font);font-size:15px;font-weight:700;border:none;border-radius:var(--r-sm);cursor:pointer;transition:all .15s;display:flex;align-items:center;justify-content:center;gap:8px;box-shadow:0 4px 20px rgba(245,200,66,.25);letter-spacing:.1px}
+.btn-primary:hover{transform:translateY(-2px);box-shadow:0 8px 28px rgba(245,200,66,.35)}
+.btn-primary:disabled{opacity:.5;cursor:not-allowed;transform:none;box-shadow:none}
+.btn-primary.teal{background:linear-gradient(135deg,var(--teal),#14b8a6);color:#0a1a18;box-shadow:0 4px 20px rgba(45,212,191,.2)}
+
+/* Ghost link */
+.link-btn{background:none;border:none;color:var(--text2);font-family:var(--font);font-size:13px;cursor:pointer;padding:0;transition:color .15s;text-decoration:underline;text-underline-offset:3px}
+.link-btn:hover{color:var(--gold)}
+
+/* Error */
+.err-box{background:var(--rose-bg);border:1px solid rgba(251,113,133,.25);color:var(--rose);border-radius:var(--r-xs);padding:10px 14px;font-size:13px;margin-top:14px;display:none;line-height:1.5}
+
+/* Progress dots */
+.progress{display:flex;gap:6px;justify-content:center;margin-bottom:28px}
+.progress-dot{width:8px;height:8px;border-radius:50%;background:var(--border2);transition:all .3s}
+.progress-dot.active{background:var(--gold);width:20px;border-radius:4px}
+.progress-dot.done{background:rgba(245,200,66,.4)}
+
+/* Divider */
+.divider{display:flex;align-items:center;gap:12px;margin:20px 0;color:var(--text3);font-size:12px}
+.divider::before,.divider::after{content:'';flex:1;height:1px;background:var(--border)}
+
+/* ── Dashboard ────────────────────────────────────────── */
+.dashboard{display:none;min-height:100vh;flex-direction:column}
+.dashboard.visible{display:flex}
+
+.dash-header{background:var(--card);border-bottom:1px solid var(--border);padding:0 24px;height:64px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:50}
+.dash-brand{display:flex;align-items:center;gap:10px}
+.dash-brand-icon{width:32px;height:32px;border-radius:9px;background:linear-gradient(135deg,var(--gold),#e6a820);display:grid;place-items:center;font-size:14px}
+.dash-brand-name{font-weight:800;font-size:16px;letter-spacing:-.3px}
+.dash-user{display:flex;align-items:center;gap:10px}
+.dash-avatar{width:36px;height:36px;border-radius:10px;background:var(--gold-bg);border:1.5px solid rgba(245,200,66,.3);color:var(--gold);font-weight:700;font-size:15px;display:grid;place-items:center}
+.dash-name{font-size:14px;font-weight:600}
+.dash-phone{font-size:12px;color:var(--text2)}
+.btn-logout{background:var(--bg3);border:1px solid var(--border2);color:var(--text2);padding:7px 14px;border-radius:var(--r-xs);font-family:var(--font);font-size:13px;cursor:pointer;transition:all .15s}
+.btn-logout:hover{border-color:var(--rose);color:var(--rose)}
+
+.dash-tabs{background:var(--card);border-bottom:1px solid var(--border);padding:0 24px;display:flex;gap:4px;overflow-x:auto}
+.dash-tab{padding:14px 18px;font-size:14px;font-weight:500;color:var(--text2);border:none;background:none;cursor:pointer;font-family:var(--font);border-bottom:2.5px solid transparent;transition:all .15s;white-space:nowrap}
+.dash-tab.active{color:var(--gold);border-bottom-color:var(--gold);font-weight:600}
+.dash-tab:hover:not(.active){color:var(--text)}
+
+.dash-content{flex:1;padding:24px;max-width:900px;width:100%;margin:0 auto}
+.tab-panel{display:none}
+.tab-panel.active{display:block;animation:fadeUp .2s ease both}
+.section-title{font-size:20px;font-weight:800;letter-spacing:-.4px;margin-bottom:4px}
+.section-sub{font-size:14px;color:var(--text2);margin-bottom:20px}
+
+/* Course cards */
+.course-grid{display:flex;flex-direction:column;gap:16px}
+.course-card{background:var(--card);border:1px solid var(--border);border-radius:var(--r);padding:20px 22px;transition:border-color .2s,box-shadow .2s;position:relative;overflow:hidden}
+.course-card:hover{border-color:var(--border2);box-shadow:var(--shadow)}
+.course-card::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:var(--card-accent,var(--teal))}
+.course-card-top{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;margin-bottom:14px}
+.course-name{font-size:17px;font-weight:700;letter-spacing:-.3px;line-height:1.3}
+.course-org{font-size:12px;color:var(--text2);margin-top:3px}
+.status-pill{display:inline-flex;align-items:center;gap:5px;padding:4px 10px;border-radius:20px;font-size:11px;font-weight:600;flex-shrink:0}
+.status-active{background:var(--green-bg);color:var(--green)}
+.status-expiring{background:var(--amber-bg);color:var(--amber)}
+.status-expired{background:var(--rose-bg);color:var(--rose)}
+.course-meta{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:16px}
+.meta-label{font-size:11px;color:var(--text3);font-weight:600;letter-spacing:.4px;text-transform:uppercase;margin-bottom:3px}
+.meta-value{font-size:14px;font-weight:600;color:var(--text)}
+.meta-value.highlight{color:var(--gold)}
+.course-actions{display:flex;gap:10px;flex-wrap:wrap}
+
+.btn-renew{display:inline-flex;align-items:center;gap:7px;padding:10px 18px;border-radius:var(--r-sm);background:linear-gradient(135deg,var(--gold),#e6a820);color:#0f0f1a;font-family:var(--font);font-size:14px;font-weight:700;border:none;cursor:pointer;transition:all .15s;box-shadow:0 3px 12px rgba(245,200,66,.25)}
+.btn-renew:hover{transform:translateY(-1px);box-shadow:0 6px 20px rgba(245,200,66,.35)}
+.btn-renew:disabled{opacity:.4;cursor:not-allowed;transform:none;box-shadow:none}
+.btn-extend{display:inline-flex;align-items:center;gap:7px;padding:10px 18px;border-radius:var(--r-sm);background:var(--teal-bg);color:var(--teal);border:1.5px solid rgba(45,212,191,.3);font-family:var(--font);font-size:14px;font-weight:600;cursor:pointer;transition:all .15s}
+.btn-extend:hover{background:rgba(45,212,191,.2);border-color:var(--teal);transform:translateY(-1px)}
+.btn-ghost-sm{display:inline-flex;align-items:center;gap:6px;padding:8px 14px;border-radius:var(--r-sm);background:var(--bg3);color:var(--text2);border:1px solid var(--border2);font-family:var(--font);font-size:13px;font-weight:500;cursor:pointer;transition:all .15s}
+.btn-ghost-sm:hover{color:var(--text)}
+.offer-banner{background:linear-gradient(135deg,rgba(245,200,66,.08),rgba(245,200,66,.03));border:1px solid rgba(245,200,66,.2);border-radius:var(--r-xs);padding:8px 12px;margin-bottom:14px;display:flex;align-items:center;gap:8px;font-size:12px;color:var(--gold2)}
+.renew-window{background:var(--amber-bg);border:1px solid rgba(251,191,36,.2);border-radius:var(--r-xs);padding:8px 12px;margin-bottom:14px;font-size:12px;color:var(--amber);display:flex;align-items:center;gap:7px}
+.locked-msg{font-size:13px;color:var(--text3);display:flex;align-items:center;gap:6px;padding:6px 0}
+
+/* Confirm modal */
+.overlay{position:fixed;inset:0;background:rgba(0,0,0,.75);backdrop-filter:blur(6px);z-index:200;display:none;place-items:center;padding:20px}
+.overlay.open{display:grid;animation:fadeIn .2s ease}
+.modal{background:var(--card);border:1px solid var(--border2);border-radius:20px;width:100%;max-width:480px;box-shadow:var(--shadow-lg);animation:fadeUp .25s ease;overflow:hidden}
+.modal-top{padding:22px 24px 18px;border-bottom:1px solid var(--border)}
+.modal-type-badge{display:inline-flex;align-items:center;gap:6px;padding:4px 12px;border-radius:20px;font-size:12px;font-weight:600;margin-bottom:10px}
+.modal-type-renewal{background:var(--gold-bg);color:var(--gold)}
+.modal-type-extension{background:var(--teal-bg);color:var(--teal)}
+.modal-title{font-size:20px;font-weight:800;letter-spacing:-.3px}
+.modal-course{font-size:14px;color:var(--text2);margin-top:3px}
+.modal-body{padding:20px 24px}
+.confirm-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:18px}
+.confirm-box{background:var(--bg3);border-radius:var(--r-sm);padding:12px 14px;border:1px solid var(--border)}
+.confirm-box-label{font-size:11px;color:var(--text3);font-weight:600;letter-spacing:.4px;text-transform:uppercase;margin-bottom:4px}
+.confirm-box-value{font-size:16px;font-weight:700}
+.confirm-box-value.green{color:var(--green)}
+.confirm-box-value.gold{color:var(--gold)}
+.price-breakdown{background:var(--bg3);border-radius:var(--r-sm);padding:14px 16px;border:1px solid var(--border);margin-bottom:18px}
+.price-row{display:flex;justify-content:space-between;align-items:center;padding:5px 0;font-size:14px}
+.price-row:not(:last-child){border-bottom:1px solid var(--border)}
+.price-row:last-child{font-weight:700;font-size:16px;color:var(--gold);padding-top:10px}
+.price-row .lbl{color:var(--text2)}
+.price-row .disc{color:var(--green)}
+.offer-applied-tag{display:inline-flex;align-items:center;gap:5px;background:var(--green-bg);color:var(--green);padding:4px 10px;border-radius:20px;font-size:12px;font-weight:600;margin-bottom:16px}
+.modal-note{font-size:13px;color:var(--text2);line-height:1.5;background:var(--bg);border-radius:var(--r-xs);padding:12px;margin-bottom:18px;border:1px solid var(--border)}
+.modal-footer{display:flex;gap:10px;padding:0 24px 22px}
+.btn-confirm{flex:1;padding:13px;background:linear-gradient(135deg,var(--gold),#e6a820);color:#0f0f1a;font-family:var(--font);font-size:15px;font-weight:700;border:none;border-radius:var(--r-sm);cursor:pointer;transition:all .15s;display:flex;align-items:center;justify-content:center;gap:8px}
+.btn-confirm.teal{background:linear-gradient(135deg,var(--teal),#14b8a6);color:#0a1a18}
+.btn-confirm:hover{transform:translateY(-1px)}
+.btn-cancel{padding:13px 20px;background:var(--bg3);border:1px solid var(--border2);color:var(--text2);font-family:var(--font);font-size:14px;border-radius:var(--r-sm);cursor:pointer;transition:all .15s}
+.btn-cancel:hover{border-color:var(--rose);color:var(--rose)}
+
+/* Success */
+.success-overlay{position:fixed;inset:0;background:rgba(0,0,0,.85);backdrop-filter:blur(8px);z-index:300;display:none;place-items:center;padding:20px}
+.success-overlay.open{display:grid;animation:fadeIn .2s ease}
+.success-card{background:var(--card);border:1px solid rgba(74,222,128,.2);border-radius:24px;padding:36px 32px;width:100%;max-width:440px;text-align:center;box-shadow:0 20px 60px rgba(0,0,0,.6);animation:fadeUp .3s ease}
+.success-icon{font-size:52px;margin-bottom:16px;display:block;animation:bounce .5s ease .1s both}
+@keyframes bounce{0%{transform:scale(0)}80%{transform:scale(1.2)}100%{transform:scale(1)}}
+.success-title{font-size:24px;font-weight:800;letter-spacing:-.4px;margin-bottom:6px;color:var(--green)}
+.success-msg{font-size:15px;color:var(--text2);line-height:1.6;margin-bottom:24px}
+.success-details{background:var(--bg3);border-radius:var(--r-sm);padding:16px;margin-bottom:24px;text-align:left}
+.success-detail-row{display:flex;justify-content:space-between;font-size:14px;padding:5px 0;border-bottom:1px solid var(--border)}
+.success-detail-row:last-child{border-bottom:none;font-weight:700;color:var(--gold)}
+.success-detail-row .lbl{color:var(--text2)}
+.btn-done{width:100%;padding:13px;background:var(--green-bg);border:1.5px solid rgba(74,222,128,.4);color:var(--green);font-family:var(--font);font-size:15px;font-weight:700;border-radius:var(--r-sm);cursor:pointer;transition:all .15s}
+.btn-done:hover{background:rgba(74,222,128,.2)}
+
+/* History */
+.history-empty{text-align:center;padding:60px 20px;color:var(--text3)}
+.history-empty-icon{font-size:44px;display:block;margin-bottom:12px}
+.history-empty-text{font-size:16px;font-weight:600;color:var(--text2);margin-bottom:4px}
+.history-list{display:flex;flex-direction:column;gap:12px}
+.history-item{background:var(--card);border:1px solid var(--border);border-radius:var(--r-sm);padding:16px 18px;display:flex;align-items:flex-start;gap:14px}
+.history-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0;margin-top:5px}
+.history-dot.renewal{background:var(--gold)}
+.history-dot.extension{background:var(--teal)}
+.history-content{flex:1}
+.history-row1{display:flex;align-items:center;gap:8px;margin-bottom:4px}
+.history-course{font-size:15px;font-weight:700}
+.history-pill{display:inline-flex;align-items:center;gap:4px;padding:2px 8px;border-radius:20px;font-size:11px;font-weight:600}
+.history-pill.renewal{background:var(--gold-bg);color:var(--gold)}
+.history-pill.extension{background:var(--teal-bg);color:var(--teal)}
+.history-dates{font-size:13px;color:var(--text2);margin-bottom:3px}
+.history-amount{font-size:13px;color:var(--text3)}
+.history-amount strong{color:var(--green);font-weight:600}
+
+/* Spinner */
+.spin{width:16px;height:16px;border:2px solid rgba(15,15,26,.25);border-top-color:#0f0f1a;border-radius:50%;animation:rotate .5s linear infinite;display:none}
+.spin.light{border-color:rgba(255,255,255,.2);border-top-color:#fff}
+@keyframes rotate{to{transform:rotate(360deg)}}
+
+/* Toast */
+.toasts{position:fixed;top:20px;right:20px;z-index:999;display:flex;flex-direction:column;gap:8px}
+.toast-item{background:var(--card2);border:1px solid var(--border2);border-radius:10px;padding:12px 16px;display:flex;align-items:center;gap:10px;font-size:14px;max-width:340px;box-shadow:var(--shadow);animation:fadeUp .3s ease}
+.toast-item.ok{border-left:3px solid var(--green)}
+.toast-item.err{border-left:3px solid var(--rose)}
+
+@media(max-width:600px){
+  .course-meta{grid-template-columns:1fr 1fr}
+  .confirm-grid{grid-template-columns:1fr 1fr}
+  .modal-footer{flex-direction:column-reverse}
+  .btn-cancel{text-align:center}
+  .dash-content{padding:16px}
+  .auth-card{padding:28px 20px}
+  .pin-box{width:48px;height:56px;font-size:24px}
+}
+</style>
+</head>
+<body>
+<div class="toasts" id="toasts"></div>
+
+<!-- ══════════════════════════════════════════════
+     AUTH SHELL — 3 steps shown one at a time
+     Step 1: Enter phone
+     Step 2a: Set PIN (new user)
+     Step 2b: Enter PIN (returning user)
+     Step 3: Forgot PIN reset
+══════════════════════════════════════════════ -->
+<div class="auth-shell" id="authShell">
+  <div class="glow glow1"></div>
+  <div class="glow glow2"></div>
+
+  <!-- ── STEP 1: Phone entry ──────────────────────── -->
+  <div class="auth-card anim-up" id="step1">
+    <div class="logo">
+      <div class="logo-icon">📚</div>
+      <div>
+        <div class="logo-name">EduRenew</div>
+        <div class="logo-sub">Student Portal</div>
+      </div>
+    </div>
+
+    <div class="progress">
+      <div class="progress-dot active" id="p1"></div>
+      <div class="progress-dot" id="p2"></div>
+    </div>
+
+    <div class="step-title">Let's get you in</div>
+    <div class="step-sub">Enter your registered mobile number to continue to your courses.</div>
+
+    <div class="field">
+      <label class="field-label">Mobile number</label>
+      <input class="field-input" id="s1Phone" placeholder="10-digit number" inputmode="tel" maxlength="10" onkeydown="if(event.key==='Enter')checkPhone()">
+    </div>
+
+    <button class="btn-primary" id="s1Btn" onclick="checkPhone()">
+      <span class="spin" id="s1Spin"></span>
+      <span id="s1Label">Continue →</span>
+    </button>
+    <div class="err-box" id="s1Err"></div>
+  </div>
+
+  <!-- ── STEP 2a: Set PIN (first time) ────────────── -->
+  <div class="auth-card anim-slide" id="step2a" style="display:none">
+    <div class="logo">
+      <div class="logo-icon">📚</div>
+      <div><div class="logo-name">EduRenew</div><div class="logo-sub">Student Portal</div></div>
+    </div>
+
+    <div class="progress">
+      <div class="progress-dot done"></div>
+      <div class="progress-dot active"></div>
+    </div>
+
+    <button class="step-back" onclick="goBack()">← Back</button>
+    <div class="step-title">Create your PIN</div>
+    <div class="step-sub">First time here! Set a 4-digit PIN to secure your account. You'll use this every time you log in.</div>
+
+    <div class="phone-chip" id="s2aPhoneChip"><span class="phone-chip-icon">📱</span><span id="s2aPhoneText">—</span></div>
+
+    <div class="field">
+      <label class="field-label">Your full name (as registered)</label>
+      <input class="field-input" id="s2aName" placeholder="e.g. Priya Sharma" autocomplete="name">
+    </div>
+
+    <label class="field-label" style="margin-bottom:10px">Choose a 4-digit PIN</label>
+    <div class="pin-row" id="setPinRow">
+      <input class="pin-box" maxlength="1" inputmode="numeric" pattern="[0-9]" onInput="pinInput(this,'setPinRow',0)" onKeydown="pinKey(event,this,'setPinRow',0)">
+      <input class="pin-box" maxlength="1" inputmode="numeric" pattern="[0-9]" onInput="pinInput(this,'setPinRow',1)" onKeydown="pinKey(event,this,'setPinRow',1)">
+      <input class="pin-box" maxlength="1" inputmode="numeric" pattern="[0-9]" onInput="pinInput(this,'setPinRow',2)" onKeydown="pinKey(event,this,'setPinRow',2)">
+      <input class="pin-box" maxlength="1" inputmode="numeric" pattern="[0-9]" onInput="pinInput(this,'setPinRow',3)" onKeydown="pinKey(event,this,'setPinRow',3)">
+    </div>
+    <button class="pin-toggle" id="toggleSetPin" onclick="togglePinVisibility('setPinRow', this)">👁 Show PIN</button>
+
+    <button class="btn-primary" id="s2aBtn" onclick="doRegister()">
+      <span class="spin" id="s2aSpin"></span>
+      <span id="s2aLabel">Set PIN & Continue →</span>
+    </button>
+    <div class="err-box" id="s2aErr"></div>
+  </div>
+
+  <!-- ── STEP 2b: Enter PIN (returning user) ──────── -->
+  <div class="auth-card anim-slide" id="step2b" style="display:none">
+    <div class="logo">
+      <div class="logo-icon">📚</div>
+      <div><div class="logo-name">EduRenew</div><div class="logo-sub">Student Portal</div></div>
+    </div>
+
+    <div class="progress">
+      <div class="progress-dot done"></div>
+      <div class="progress-dot active"></div>
+    </div>
+
+    <button class="step-back" onclick="goBack()">← Back</button>
+    <div class="step-title">Welcome back!</div>
+    <div class="step-sub">Enter your 4-digit PIN to access your courses.</div>
+
+    <div class="phone-chip" id="s2bPhoneChip"><span class="phone-chip-icon">📱</span><span id="s2bPhoneText">—</span></div>
+
+    <label class="field-label" style="margin-bottom:10px">Your PIN</label>
+    <div class="pin-row" id="loginPinRow">
+      <input class="pin-box" maxlength="1" inputmode="numeric" pattern="[0-9]" onInput="pinInput(this,'loginPinRow',0)" onKeydown="pinKey(event,this,'loginPinRow',0)">
+      <input class="pin-box" maxlength="1" inputmode="numeric" pattern="[0-9]" onInput="pinInput(this,'loginPinRow',1)" onKeydown="pinKey(event,this,'loginPinRow',1)">
+      <input class="pin-box" maxlength="1" inputmode="numeric" pattern="[0-9]" onInput="pinInput(this,'loginPinRow',2)" onKeydown="pinKey(event,this,'loginPinRow',2)">
+      <input class="pin-box" maxlength="1" inputmode="numeric" pattern="[0-9]" onInput="pinInput(this,'loginPinRow',3)" onKeydown="pinKey(event,this,'loginPinRow',3)">
+    </div>
+    <button class="pin-toggle" id="toggleLoginPin" onclick="togglePinVisibility('loginPinRow', this)">👁 Show PIN</button>
+
+    <button class="btn-primary" id="s2bBtn" onclick="doLogin()">
+      <span class="spin" id="s2bSpin"></span>
+      <span id="s2bLabel">Login →</span>
+    </button>
+    <div class="err-box" id="s2bErr"></div>
+
+    <div class="divider">or</div>
+    <button class="link-btn" style="width:100%;text-align:center" onclick="showForgotPin()">Forgot PIN? Reset it</button>
+  </div>
+
+  <!-- ── STEP 3: Forgot PIN reset ─────────────────── -->
+  <div class="auth-card anim-slide" id="step3" style="display:none">
+    <div class="logo">
+      <div class="logo-icon">📚</div>
+      <div><div class="logo-name">EduRenew</div><div class="logo-sub">Student Portal</div></div>
+    </div>
+
+    <button class="step-back" onclick="showStep('2b')">← Back to login</button>
+    <div class="step-title">Reset your PIN</div>
+    <div class="step-sub">Verify your name as registered with your educator, then set a new PIN.</div>
+
+    <div class="phone-chip" id="s3PhoneChip"><span class="phone-chip-icon">📱</span><span id="s3PhoneText">—</span></div>
+
+    <div class="field">
+      <label class="field-label">Your full name (as registered)</label>
+      <input class="field-input" id="s3Name" placeholder="e.g. Priya Sharma" autocomplete="name">
+    </div>
+
+    <label class="field-label" style="margin-bottom:10px">New 4-digit PIN</label>
+    <div class="pin-row" id="resetPinRow">
+      <input class="pin-box" maxlength="1" inputmode="numeric" pattern="[0-9]" onInput="pinInput(this,'resetPinRow',0)" onKeydown="pinKey(event,this,'resetPinRow',0)">
+      <input class="pin-box" maxlength="1" inputmode="numeric" pattern="[0-9]" onInput="pinInput(this,'resetPinRow',1)" onKeydown="pinKey(event,this,'resetPinRow',1)">
+      <input class="pin-box" maxlength="1" inputmode="numeric" pattern="[0-9]" onInput="pinInput(this,'resetPinRow',2)" onKeydown="pinKey(event,this,'resetPinRow',2)">
+      <input class="pin-box" maxlength="1" inputmode="numeric" pattern="[0-9]" onInput="pinInput(this,'resetPinRow',3)" onKeydown="pinKey(event,this,'resetPinRow',3)">
+    </div>
+    <button class="pin-toggle" onclick="togglePinVisibility('resetPinRow', this)">👁 Show PIN</button>
+
+    <button class="btn-primary teal" id="s3Btn" onclick="doReset()">
+      <span class="spin light" id="s3Spin"></span>
+      <span id="s3Label">Reset PIN →</span>
+    </button>
+    <div class="err-box" id="s3Err"></div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════
+     DASHBOARD (shown after successful auth)
+══════════════════════════════════════════════ -->
+<div class="dashboard" id="dashboard">
+  <header class="dash-header">
+    <div class="dash-brand">
+      <div class="dash-brand-icon">📚</div>
+      <div class="dash-brand-name">EduRenew</div>
+    </div>
+    <div class="dash-user">
+      <div class="dash-avatar" id="dashAvatar">?</div>
+      <div>
+        <div class="dash-name" id="dashName">—</div>
+        <div class="dash-phone" id="dashPhone">—</div>
+      </div>
+      <button class="btn-logout" onclick="doLogout()">Sign out</button>
+    </div>
+  </header>
+
+  <div class="dash-tabs">
+    <button class="dash-tab active" onclick="switchTab('courses')">📖 My Courses</button>
+    <button class="dash-tab" onclick="switchTab('renew')">🔄 Renewals</button>
+    <button class="dash-tab" onclick="switchTab('extend')">⏳ Extensions</button>
+    <button class="dash-tab" onclick="switchTab('history')">📋 History</button>
+  </div>
+
+  <div class="dash-content">
+    <div class="tab-panel active" id="tab-courses">
+      <div class="section-title">My Courses</div>
+      <div class="section-sub">All courses on your account</div>
+      <div class="course-grid" id="allCoursesList"></div>
+    </div>
+    <div class="tab-panel" id="tab-renew">
+      <div class="section-title">Course Renewals</div>
+      <div class="section-sub">Available 15 days before and after your course expiry</div>
+      <div class="course-grid" id="renewCoursesList"></div>
+    </div>
+    <div class="tab-panel" id="tab-extend">
+      <div class="section-title">Validity Extensions</div>
+      <div class="section-sub">Active educator offers on your enrolled courses</div>
+      <div class="course-grid" id="extendCoursesList"></div>
+    </div>
+    <div class="tab-panel" id="tab-history">
+      <div class="section-title">Transaction History</div>
+      <div class="section-sub">All your renewals and extensions</div>
+      <div id="historyContainer"></div>
+    </div>
+  </div>
+</div>
+
+<!-- Confirm modal -->
+<div class="overlay" id="confirmOverlay">
+  <div class="modal">
+    <div class="modal-top">
+      <div class="modal-type-badge" id="modalBadge">🔄 Renewal</div>
+      <div class="modal-title" id="modalTitle">Confirm Renewal</div>
+      <div class="modal-course" id="modalCourse">Course name</div>
+    </div>
+    <div class="modal-body">
+
+      <!-- Coupon highlight — shown when offer is active -->
+      <div id="offerHighlight" style="display:none;margin-bottom:20px">
+        <div style="background:linear-gradient(135deg,rgba(245,200,66,.12),rgba(245,200,66,.04));border:1.5px solid rgba(245,200,66,.35);border-radius:14px;padding:20px 20px 16px">
+          <div style="display:flex;align-items:center;gap:8px;margin-bottom:12px">
+            <span style="font-size:20px">🎁</span>
+            <span style="font-size:12px;font-weight:700;color:var(--gold2);letter-spacing:.6px;text-transform:uppercase">Special offer applied</span>
+          </div>
+          <div style="font-size:22px;font-weight:800;color:var(--gold);letter-spacing:-.3px;margin-bottom:4px" id="m_offerName">—</div>
+          <div style="font-size:15px;font-weight:600;color:var(--gold2)" id="m_discSummary">—</div>
+          <div style="margin-top:12px;padding-top:12px;border-top:1px solid rgba(245,200,66,.2)">
+            <div style="display:flex;justify-content:space-between;font-size:13px;color:var(--text2);margin-bottom:4px">
+              <span>Original price</span><span id="m_origPrice">—</span>
+            </div>
+            <div style="display:flex;justify-content:space-between;font-size:13px;color:var(--green)">
+              <span>You save</span><span id="m_disc">—</span>
+            </div>
+            <div style="display:flex;justify-content:space-between;font-size:18px;font-weight:800;color:var(--gold);margin-top:8px;padding-top:8px;border-top:1px solid rgba(245,200,66,.2)">
+              <span>Pay now</span><span id="m_final">—</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- No offer state — just show course info cleanly -->
+      <div id="noOfferBox" style="display:none;margin-bottom:20px">
+        <div style="background:var(--bg3);border:1px solid var(--border);border-radius:12px;padding:18px 20px">
+          <div style="font-size:14px;color:var(--text2);margin-bottom:6px">You are renewing</div>
+          <div style="font-size:18px;font-weight:700;color:var(--text)" id="m_courseNameBox">—</div>
+          <div style="font-size:13px;color:var(--text3);margin-top:4px">No active discount offer at the moment.</div>
+        </div>
+      </div>
+
+      <div class="modal-note">Clicking <strong>Renew Now</strong> will take you to the payment page. Complete your payment to activate the renewal.</div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-cancel" onclick="closeConfirm()">Cancel</button>
+      <button class="btn-confirm" id="btnConfirm" onclick="submitRequest()">
+        <span class="spin light" id="confirmSpin"></span>
+        <span id="btnConfirmLabel">Renew Now</span>
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- Success modal -->
+<div class="success-overlay" id="successOverlay">
+  <div class="success-card">
+    <span class="success-icon">🎉</span>
+    <div class="success-title" id="successTitle">Confirmed!</div>
+    <div class="success-msg" id="successMsg"></div>
+    <div class="success-details" id="successDetails"></div>
+    <button class="btn-done" onclick="closeSuccess()">View my courses →</button>
+  </div>
+</div>
+
+<script>
+// ── Session storage keys ─────────────────────────────────────
+const SK_PHONE = 'er_phone';
+const SK_TOKEN = 'er_token';
+const SK_NAME  = 'er_name';
+const SK_EXPIRY= 'er_expiry';  // timestamp ms
+
+// ── App state ─────────────────────────────────────────────────
+const app = { phone: null, token: null, studentName: null, courses: [], pending: null, monthlyCoupon: null };
+
+// ── Boot: try to restore session from localStorage ────────────
+window.addEventListener('DOMContentLoaded', () => {
+  const phone  = localStorage.getItem(SK_PHONE);
+  const token  = localStorage.getItem(SK_TOKEN);
+  const name   = localStorage.getItem(SK_NAME);
+  const expiry = parseInt(localStorage.getItem(SK_EXPIRY) || '0');
+
+  if (phone && token && expiry > Date.now()) {
+    // Session looks valid locally — verify with server then load dashboard
+    app.phone = phone; app.token = token; app.studentName = name;
+    google.script.run
+      .withSuccessHandler(res => {
+        if (res.success) {
+          // Token still valid — load data
+          loadStudentData();
+        } else {
+          clearSession();
+          showStep('1');
+        }
+      })
+      .withFailureHandler(() => { clearSession(); showStep('1'); })
+      .validateSession(phone, token);
+  } else {
+    clearSession();
+    showStep('1');
+  }
+});
+
+// ── Step navigation ──────────────────────────────────────────
+function showStep(step) {
+  ['1','2a','2b','3'].forEach(s => {
+    const el = document.getElementById('step'+s);
+    if (el) el.style.display = 'none';
+  });
+  const target = document.getElementById('step'+step);
+  if (target) { target.style.display = 'block'; target.className = 'auth-card anim-slide'; }
+  document.getElementById('authShell').style.display = 'flex';
+  document.getElementById('dashboard').classList.remove('visible');
+}
+
+function goBack() { showStep('1'); }
+function showForgotPin() {
+  const phone = app.phone || '';
+  document.getElementById('s3PhoneChip').querySelector('span:last-child').textContent = phone;
+  document.getElementById('s3PhoneText').textContent = phone;
+  clearPinRow('resetPinRow');
+  document.getElementById('s3Name').value = '';
+  document.getElementById('s3Err').style.display = 'none';
+  showStep('3');
+}
+
+// ── Step 1: Check phone ──────────────────────────────────────
+function checkPhone() {
+  const phone = document.getElementById('s1Phone').value.trim().replace(/\D/g,'');
+  if (phone.length < 10) { showErr('s1Err','Enter a valid 10-digit number'); return; }
+
+  setBtnLoad('s1Btn','s1Spin','s1Label',true,'Checking...');
+
+  google.script.run
+    .withSuccessHandler(res => {
+      setBtnLoad('s1Btn','s1Spin','s1Label',false,'Continue →');
+      if (!res.success) { showErr('s1Err', res.error); return; }
+
+      app.phone = phone;
+      if (res.registered) {
+        // Returning user → show PIN entry
+        document.getElementById('s2bPhoneChip').querySelector('span:last-child').textContent = phone;
+        document.getElementById('s2bPhoneText').textContent = phone;
+        clearPinRow('loginPinRow');
+        document.getElementById('s2bErr').style.display = 'none';
+        showStep('2b');
+        setTimeout(() => focusPinRow('loginPinRow'), 200);
+      } else {
+        // New user → show PIN setup
+        document.getElementById('s2aPhoneChip').querySelector('span:last-child').textContent = phone;
+        document.getElementById('s2aPhoneText').textContent = phone;
+        clearPinRow('setPinRow');
+        document.getElementById('s2aName').value = '';
+        document.getElementById('s2aErr').style.display = 'none';
+        showStep('2a');
+      }
+    })
+    .withFailureHandler(err => {
+      setBtnLoad('s1Btn','s1Spin','s1Label',false,'Continue →');
+      showErr('s1Err','Connection error. Please try again.');
+    })
+    .checkRegistration(phone);
+}
+
+// ── Step 2a: Register PIN ─────────────────────────────────────
+function doRegister() {
+  const name = document.getElementById('s2aName').value.trim();
+  const pin  = getPinValue('setPinRow');
+  if (!name) { showErr('s2aErr','Please enter your full name'); return; }
+  if (pin.length !== 4) { showErr('s2aErr','Enter all 4 digits of your PIN'); return; }
+
+  setBtnLoad('s2aBtn','s2aSpin','s2aLabel',true,'Setting up...');
+
+  google.script.run
+    .withSuccessHandler(res => {
+      setBtnLoad('s2aBtn','s2aSpin','s2aLabel',false,'Set PIN & Continue →');
+      if (!res.success) { showErr('s2aErr', res.error); return; }
+      saveSession(res.token, res.studentName);
+      loadStudentData();
+    })
+    .withFailureHandler(() => {
+      setBtnLoad('s2aBtn','s2aSpin','s2aLabel',false,'Set PIN & Continue →');
+      showErr('s2aErr','Registration failed. Please try again.');
+    })
+    .registerPin(app.phone, name, pin);
+}
+
+// ── Step 2b: Login with PIN ──────────────────────────────────
+function doLogin() {
+  const pin = getPinValue('loginPinRow');
+  if (pin.length !== 4) { showErr('s2bErr','Enter your 4-digit PIN'); return; }
+
+  setBtnLoad('s2bBtn','s2bSpin','s2bLabel',true,'Logging in...');
+
+  google.script.run
+    .withSuccessHandler(res => {
+      setBtnLoad('s2bBtn','s2bSpin','s2bLabel',false,'Login →');
+      if (!res.success) { showErr('s2bErr', res.error); clearPinRow('loginPinRow'); return; }
+      saveSession(res.token, res.studentName);
+      loadStudentData();
+    })
+    .withFailureHandler(() => {
+      setBtnLoad('s2bBtn','s2bSpin','s2bLabel',false,'Login →');
+      showErr('s2bErr','Connection error. Please try again.');
+      clearPinRow('loginPinRow');
+    })
+    .loginWithPin(app.phone, pin);
+}
+
+// ── Step 3: Reset PIN ────────────────────────────────────────
+function doReset() {
+  const name = document.getElementById('s3Name').value.trim();
+  const pin  = getPinValue('resetPinRow');
+  if (!name) { showErr('s3Err','Please enter your registered name'); return; }
+  if (pin.length !== 4) { showErr('s3Err','Enter all 4 digits of your new PIN'); return; }
+
+  setBtnLoad('s3Btn','s3Spin','s3Label',true,'Resetting...');
+
+  google.script.run
+    .withSuccessHandler(res => {
+      setBtnLoad('s3Btn','s3Spin','s3Label',false,'Reset PIN →');
+      if (!res.success) { showErr('s3Err', res.error); return; }
+      saveSession(res.token, res.studentName);
+      showToast('PIN reset successfully!', 'ok');
+      loadStudentData();
+    })
+    .withFailureHandler(() => {
+      setBtnLoad('s3Btn','s3Spin','s3Label',false,'Reset PIN →');
+      showErr('s3Err','Reset failed. Please try again.');
+    })
+    .resetPin(app.phone, name, pin);
+}
+
+// ── Session helpers ──────────────────────────────────────────
+function saveSession(token, name) {
+  const expiry = Date.now() + (7 * 24 * 60 * 60 * 1000); // 7 days ms
+  app.token = token; app.studentName = name;
+  localStorage.setItem(SK_PHONE,  app.phone);
+  localStorage.setItem(SK_TOKEN,  token);
+  localStorage.setItem(SK_NAME,   name);
+  localStorage.setItem(SK_EXPIRY, expiry.toString());
+}
+
+function clearSession() {
+  app.phone = null; app.token = null; app.studentName = null;
+  [SK_PHONE, SK_TOKEN, SK_NAME, SK_EXPIRY].forEach(k => localStorage.removeItem(k));
+}
+
+function doLogout() {
+  if (app.phone && app.token) {
+    google.script.run.withSuccessHandler(()=>{}).withFailureHandler(()=>{})
+      .logoutStudent(app.phone, app.token);
+  }
+  clearSession();
+  document.getElementById('dashboard').classList.remove('visible');
+  document.getElementById('authShell').style.display = 'flex';
+  showStep('1');
+  document.getElementById('s1Phone').value = '';
+}
+
+// ── Load student data ────────────────────────────────────────
+function loadStudentData() {
+  google.script.run
+    .withSuccessHandler(data => {
+      if (data.sessionExpired || !data.success) {
+        clearSession(); showStep('1');
+        showToast('Session expired. Please log in again.', 'err');
+        return;
+      }
+      app.studentName = data.studentName;
+      // Also fetch the active monthly coupon for auto-apply on renewal
+      google.script.run
+        .withSuccessHandler(cd => { app.monthlyCoupon = cd.coupon || null; })
+        .withFailureHandler(() => { app.monthlyCoupon = null; })
+        .getActiveMonthlyCoupon();
+      renderDashboard(data);
+    })
+    .withFailureHandler(() => { showToast('Failed to load courses. Please try again.', 'err'); })
+    .studentLookup(app.phone, app.token);
+}
+
+// ── Render dashboard ─────────────────────────────────────────
+function renderDashboard(data) {
+  document.getElementById('authShell').style.display = 'none';
+  document.getElementById('dashboard').classList.add('visible');
+  const name = data.studentName || '';
+  document.getElementById('dashAvatar').textContent = name[0]?.toUpperCase() || '?';
+  document.getElementById('dashName').textContent   = name;
+  document.getElementById('dashPhone').textContent  = '📱 ' + data.phone;
+  renderAllCourses(data.courses);
+  renderRenewTab(data.courses);
+  renderExtendTab(data.courses);
+  renderHistory(data.history || []);
+  switchTab('courses');
+}
+
+function switchTab(tab) {
+  document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.dash-tab').forEach(t => t.classList.remove('active'));
+  document.getElementById('tab-'+tab).classList.add('active');
+  const tabs=['courses','renew','extend','history'];
+  document.querySelectorAll('.dash-tab')[tabs.indexOf(tab)]?.classList.add('active');
+}
+
+// ── Course renderers ─────────────────────────────────────────
+function renderAllCourses(courses) {
+  const el = document.getElementById('allCoursesList');
+  if (!courses.length) { el.innerHTML = emptyState('📖','No courses found','No purchases found on your account'); return; }
+  el.innerHTML = courses.map(c => courseCard(c,'all')).join('');
+}
+
+function renderRenewTab(courses) {
+  const el = document.getElementById('renewCoursesList');
+  if (!courses.length) { el.innerHTML = emptyState('🔄','No courses','No purchases found'); return; }
+  const eligible = courses.filter(c => c.renewEligible);
+  const locked   = courses.filter(c => !c.renewEligible);
+  let html = '';
+  if (!eligible.length) html += `<div style="background:var(--card);border:1px solid var(--border);border-radius:var(--r);padding:20px 22px;margin-bottom:12px;font-size:14px;color:var(--text2);line-height:1.7">🔒 <strong style="color:var(--text)">No courses in the renewal window.</strong><br>Renewal opens <strong>15 days before</strong> expiry and stays open for <strong>15 days after</strong> expiry.</div>`;
+  else html += eligible.map(c => courseCard(c,'renew')).join('');
+  if (locked.length) {
+    html += `<div style="font-size:12px;color:var(--text3);font-weight:600;letter-spacing:.5px;text-transform:uppercase;margin:18px 0 8px">Other courses</div>`;
+    html += locked.map(c => courseCard(c,'renew-locked')).join('');
+  }
+  el.innerHTML = html;
+}
+
+function renderExtendTab(courses) {
+  const el = document.getElementById('extendCoursesList');
+  const eligible = courses.filter(c => c.extendEligible);
+  if (!eligible.length) { el.innerHTML = emptyState('⏳','No active offers',"Your educator hasn't set any extension offers right now. Check back soon!"); return; }
+  el.innerHTML = eligible.map(c => courseCard(c,'extend')).join('');
+}
+
+function courseCard(c, mode) {
+  const isExpired  = c.isExpired;
+  const daysLeft   = c.daysToExpiry;
+  let statusClass, statusText;
+  if (isExpired) { statusClass='status-expired'; statusText=`Expired ${Math.abs(daysLeft)}d ago`; }
+  else if (daysLeft<=15) { statusClass='status-expiring'; statusText=`Expires in ${daysLeft}d`; }
+  else { statusClass='status-active'; statusText=`Active · ${daysLeft}d left`; }
+  const accent = isExpired ? 'var(--rose)' : daysLeft<=15 ? 'var(--amber)' : 'var(--teal)';
+
+  let offerBanner = '', windowBanner = '';
+  if (mode==='renew' && c.renewOffer) {
+    const o=c.renewOffer; const dt=o.discountType==='PERCENT'?`${o.discountValue}% off`:`₹${o.discountValue} off`;
+    offerBanner=`<div class="offer-banner"><span>🎁</span><span><strong>${esc(o.offerName)}</strong> — ${dt} · ${o.validityDays} days validity</span></div>`;
+  }
+  if (mode==='extend' && c.extendOffer) {
+    const o=c.extendOffer; const dt=o.discountType==='PERCENT'?`${o.discountValue}% off`:`₹${o.discountValue} off`;
+    offerBanner=`<div class="offer-banner"><span>⚡</span><span><strong>${esc(o.offerName)}</strong> — ${dt} · +${o.validityDays} days added</span></div>`;
+  }
+  if (mode==='renew' && c.renewEligible) {
+    windowBanner = isExpired
+      ? `<div class="renew-window">⏰ Course expired ${Math.abs(daysLeft)}d ago — window closes in ${15-Math.abs(daysLeft)} days</div>`
+      : `<div class="renew-window">⏰ Renewal window open — ${daysLeft} days until expiry</div>`;
+  }
+
+  let actions='';
+  if (mode==='all') actions=`<button class="btn-ghost-sm" onclick="switchTab('renew')">Renew options →</button>`;
+  else if (mode==='renew') actions=`<button class="btn-renew" onclick='openConfirm(${JSON.stringify(c)},"RENEWAL")'>🔄 Renew Course</button>`;
+  else if (mode==='renew-locked') {
+    const daysUntil = Math.max(0, daysLeft-15);
+    actions=`<div class="locked-msg">🔒 ${daysUntil>0?`Opens in ${daysUntil} days`:'Not eligible yet'}</div>`;
+  }
+  else if (mode==='extend') actions=`<button class="btn-extend" onclick='openConfirm(${JSON.stringify(c)},"EXTENSION")'>⏳ Extend Validity</button>`;
+
+  return `<div class="course-card" style="--card-accent:${accent}">
+    <div class="course-card-top">
+      <div><div class="course-name">${esc(c.course)}</div>${c.orgName?`<div class="course-org">${esc(c.orgName)}</div>`:''}</div>
+      <span class="${statusClass} status-pill">${statusText}</span>
+    </div>
+    ${offerBanner}${windowBanner}
+    <div class="course-meta">
+      <div><div class="meta-label">Purchased</div><div class="meta-value">${esc(c.purchaseDate||'—')}</div></div>
+      <div><div class="meta-label">Expires</div><div class="meta-value ${isExpired?'':'highlight'}">${esc(c.expiryDate||'—')}</div></div>
+      <div><div class="meta-label">Amount paid</div><div class="meta-value">₹${fmtMoney(c.amountPaid)}</div></div>
+    </div>
+    <div class="course-actions">${actions}</div>
+  </div>`;
+}
+
+// ── Confirm modal ─────────────────────────────────────────────
+function openConfirm(course, type) {
+  // Priority: OfferConfig offer > active monthly coupon > no discount
+  let offer = type==='RENEWAL' ? course.renewOffer : course.extendOffer;
+
+  // If no OfferConfig offer for RENEWAL, check if there's an active monthly coupon
+  if (!offer && type==='RENEWAL' && app.monthlyCoupon) {
+    const mc = app.monthlyCoupon;
+    offer = {
+      offerName:     mc.DisplayName || mc.CouponCode,  // tutor-set display name
+      discountType:  (mc.DiscountType||'PERCENT').toUpperCase(),
+      discountValue: parseFloat(mc.DiscountValue) || 0,
+      maxDiscount:   parseFloat(mc.MaxDiscount) || 999999,
+      renewalPrice:  0,
+      validityDays:  365,
+      couponCode:    mc.IsFlatDiscount ? null : mc.CouponCode, // no code for flat discount
+      isMonthlyCoupon: true,
+      isFlatDiscount:  !!mc.IsFlatDiscount
+    };
+  }
+
+  const originalPrice = (offer?.renewalPrice || 0) > 0 ? offer.renewalPrice : course.amountPaid;
+  const validityDays  = offer?.validityDays || 365;
+  let discountAmt = 0;
+  if (offer) {
+    discountAmt = offer.discountType==='PERCENT'
+      ? Math.min((originalPrice*offer.discountValue)/100, offer.maxDiscount||999999)
+      : (offer.discountValue||0);
+  }
+  discountAmt = Math.round(Math.min(discountAmt, originalPrice));
+  const finalAmt = originalPrice - discountAmt;
+  const oldExpiry = new Date(course.expiryDate);
+  const baseDate  = type==='RENEWAL' ? (oldExpiry<new Date()?new Date():oldExpiry) : oldExpiry;
+  const newExpiry = new Date(baseDate); newExpiry.setDate(newExpiry.getDate()+validityDays);
+
+  app.pending = { course, type, offer, originalPrice, discountAmt, finalAmt, validityDays, newExpiry };
+
+  const isRenew = type==='RENEWAL';
+  const badge = document.getElementById('modalBadge');
+  badge.textContent = isRenew?'🔄 Renewal':'⏳ Extension';
+  badge.className   = 'modal-type-badge '+(isRenew?'modal-type-renewal':'modal-type-extension');
+  document.getElementById('modalTitle').textContent  = isRenew?'Confirm Renewal':'Confirm Extension';
+  document.getElementById('modalCourse').textContent = course.course;
+  // Show offer highlight or plain box
+  if (offer && discountAmt > 0) {
+    document.getElementById('offerHighlight').style.display = 'block';
+    document.getElementById('noOfferBox').style.display     = 'none';
+    document.getElementById('m_offerName').textContent    = offer.offerName;
+    const pct = offer.discountType === 'PERCENT';
+    document.getElementById('m_discSummary').textContent  =
+      pct ? offer.discountValue + '% off your renewal'
+          : 'Rs.' + fmtMoney(offer.discountValue) + ' flat off all courses';
+    document.getElementById('m_origPrice').textContent = 'Rs.' + fmtMoney(originalPrice);
+    document.getElementById('m_disc').textContent      = 'Rs.' + fmtMoney(discountAmt);
+    document.getElementById('m_final').textContent     = 'Rs.' + fmtMoney(finalAmt);
+  } else {
+    document.getElementById('offerHighlight').style.display = 'none';
+    document.getElementById('noOfferBox').style.display     = 'block';
+    document.getElementById('m_courseNameBox').textContent  = course.course;
+  }
+  const btn = document.getElementById('btnConfirm');
+  btn.classList.toggle('teal', !isRenew);
+  document.getElementById('btnConfirmLabel').textContent = 'Renew Now';
+  document.getElementById('confirmOverlay').classList.add('open');
+}
+
+function closeConfirm() { document.getElementById('confirmOverlay').classList.remove('open'); }
+
+function submitRequest() {
+  if (!app.pending) return;
+  const { course, type, offer } = app.pending;
+
+  document.getElementById('btnConfirm').disabled = true;
+  document.getElementById('confirmSpin').style.display = 'block';
+  document.getElementById('btnConfirmLabel').textContent = 'Loading...';
+
+  // Step 1: Log the renewal intent in the sheet
+  const payload = {
+    phone: app.phone, token: app.token,
+    course: course.course, requestType: type,
+    offerId: offer?.offerId || null,
+    monthlyCouponCode: offer?.isMonthlyCoupon ? offer.couponCode : null,
+    notes: offer?.offerName ? 'Offer: ' + offer.offerName : ''
+  };
+
+  // Step 2: Fetch the the platform payment URL with coupon appended
+  google.script.run
+    .withSuccessHandler(urlData => {
+      // Log the intent regardless of URL fetch result
+      google.script.run
+        .withSuccessHandler(() => {})
+        .withFailureHandler(() => {})
+        .studentSubmitRequest(payload);
+
+      document.getElementById('btnConfirm').disabled = false;
+      document.getElementById('confirmSpin').style.display = 'none';
+      document.getElementById('btnConfirmLabel').textContent = 'Renew Now';
+      closeConfirm();
+
+      if (!urlData.success) {
+        // No payment URL configured — show message
+        showNoUrlModal(course.course);
+        return;
+      }
+
+      // Redirect to the platform payment page
+      showRedirectModal(urlData.paymentUrl, urlData.couponCode, course.course, app.pending.discountAmt, app.pending.finalAmt);
+    })
+    .withFailureHandler(() => {
+      document.getElementById('btnConfirm').disabled = false;
+      document.getElementById('confirmSpin').style.display = 'none';
+      document.getElementById('btnConfirmLabel').textContent = 'Renew Now';
+      showToast('Could not get payment URL. Please try again.', 'err');
+    })
+    .getPaymentRedirectUrl(app.phone, course.course);
+}
+
+// Show the redirect confirmation screen before opening the platform
+function showRedirectModal(paymentUrl, couponCode, courseName, discountAmt, finalAmt) {
+  // Build redirect screen overlay
+  let overlay = document.getElementById('redirectOverlay');
+  if (!overlay) {
+    overlay = document.createElement('div');
+    overlay.id = 'redirectOverlay';
+    overlay.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,.85);backdrop-filter:blur(8px);z-index:400;display:grid;place-items:center;padding:20px';
+    overlay.innerHTML = `
+      <div style="background:var(--card);border:1px solid rgba(45,212,191,.3);border-radius:24px;padding:36px 32px;width:100%;max-width:440px;text-align:center;box-shadow:0 20px 60px rgba(0,0,0,.6)">
+        <div style="font-size:48px;margin-bottom:16px">🎯</div>
+        <div style="font-size:22px;font-weight:800;letter-spacing:-.4px;margin-bottom:8px;color:var(--text)">One step left!</div>
+        <div style="font-size:14px;color:var(--text2);line-height:1.6;margin-bottom:20px" id="rd_msg"></div>
+        <div id="rd_coupon" style="display:none;margin-bottom:16px">
+          <div style="background:rgba(74,222,128,.08);border:1.5px dashed rgba(74,222,128,.4);border-radius:10px;padding:12px 16px">
+            <div style="font-size:11px;color:var(--text3);font-weight:600;letter-spacing:.5px;text-transform:uppercase;margin-bottom:4px">Coupon auto-applied</div>
+            <div style="font-family:monospace;font-size:20px;font-weight:700;color:var(--green);letter-spacing:2px" id="rd_code"></div>
+            <div style="font-size:13px;color:var(--text2);margin-top:4px" id="rd_saving"></div>
+          </div>
+        </div>
+        <div style="background:var(--bg3);border-radius:8px;padding:10px 14px;margin-bottom:20px;font-size:12px;color:var(--text3);word-break:break-all;text-align:left" id="rd_url"></div>
+        <div style="display:flex;gap:10px">
+          <button onclick="document.getElementById('redirectOverlay').remove()" style="flex:0 0 auto;padding:12px 18px;background:var(--bg3);border:1px solid rgba(255,255,255,.12);color:var(--text2);border-radius:9px;cursor:pointer;font-family:var(--font);font-size:14px">Go back</button>
+          <button id="rd_payBtn" style="flex:1;padding:12px;background:linear-gradient(135deg,#2dd4bf,#14b8a6);color:#0a1a18;font-family:var(--font);font-size:15px;font-weight:700;border:none;border-radius:9px;cursor:pointer">Proceed to Pay →</button>
+        </div>
+      </div>`;
+    document.body.appendChild(overlay);
+  }
+
+  document.getElementById('rd_msg').textContent = 'You will be taken to the course payment page for ' + courseName + '. Your discount is applied automatically.';
+  document.getElementById('rd_url').textContent = paymentUrl;
+
+  if (discountAmt > 0) {
+    document.getElementById('rd_coupon').style.display = 'block';
+    document.getElementById('rd_code').textContent = couponCode || 'Discount applied';
+    document.getElementById('rd_code').style.letterSpacing = couponCode ? '2px' : 'normal';
+    document.getElementById('rd_saving').textContent = 'You save Rs.' + fmtMoney(discountAmt) + ' — Pay Rs.' + fmtMoney(finalAmt);
+  } else {
+    document.getElementById('rd_coupon').style.display = 'none';
+  }
+
+  document.getElementById('rd_payBtn').onclick = () => {
+    window.open(paymentUrl, '_blank');
+    document.getElementById('redirectOverlay').remove();
+    showToast('Payment page opened in a new tab. Come back here after completing your payment.', 'ok');
+    switchTab('courses');
+  };
+}
+
+function showNoUrlModal(courseName) {
+  showToast('Course payment page not available for ' + courseName + '. Please contact your educator.', 'err');
+}
+
+function showSuccess(data) {
+  document.getElementById('successTitle').textContent = data.requestType==='RENEWAL'?'🎉 Renewed!':'🎉 Extended!';
+  document.getElementById('successMsg').textContent = data.message;
+  const details=[
+    ['Transaction ID', data.transactionId],
+    ['Course', data.courseName],
+    ['Old expiry', data.oldExpiryDate],
+    ['New expiry', data.newExpiryDate],
+    ['Days added', '+'+data.daysAdded+' days'],
+    ...(data.discountAmount>0?[['You saved','₹'+fmtMoney(data.discountAmount)]]:[] ),
+    ['Amount payable','₹'+fmtMoney(data.amountPaid)],
+  ];
+  document.getElementById('successDetails').innerHTML = details.map(([l,v])=>
+    `<div class="success-detail-row"><span class="lbl">${esc(l)}</span><span>${esc(v.toString())}</span></div>`
+  ).join('');
+  document.getElementById('successOverlay').classList.add('open');
+}
+
+function closeSuccess() { document.getElementById('successOverlay').classList.remove('open'); switchTab('courses'); }
+
+// ── History ──────────────────────────────────────────────────
+function renderHistory(history) {
+  const el=document.getElementById('historyContainer');
+  if (!history.length) { el.innerHTML=`<div class="history-empty"><span class="history-empty-icon">📋</span><div class="history-empty-text">No history yet</div><div style="font-size:14px">Renewals and extensions will appear here.</div></div>`; return; }
+  el.innerHTML=`<div class="history-list">`+history.map(h=>{
+    const type=(h.RenewalType||'').toString().toLowerCase();
+    return `<div class="history-item">
+      <div class="history-dot ${type}" style="margin-top:5px"></div>
+      <div class="history-content">
+        <div class="history-row1"><span class="history-course">${esc(h.Course||'')}</span><span class="history-pill ${type}">${type==='renewal'?'🔄 Renewal':'⏳ Extension'}</span></div>
+        <div class="history-dates">📅 ${esc(h.OldExpiryDate||'')} → ${esc(h.NewExpiryDate||'')} · +${h.DaysExtended||0} days</div>
+        <div class="history-amount">Paid: <strong>₹${fmtMoney(h.AmountPaid||0)}</strong>${h.DiscountGiven>0?` · Saved ₹${fmtMoney(h.DiscountGiven)}`:''} · <span style="color:var(--text3);font-size:12px">${esc((h.Timestamp||'').toString().slice(0,16))}</span></div>
+      </div>
+    </div>`;
+  }).join('')+`</div>`;
+}
+
+// ── PIN box helpers ──────────────────────────────────────────
+function pinInput(el, rowId, idx) {
+  const val = el.value.replace(/\D/g,'');
+  el.value = val ? val[0] : '';
+  el.classList.toggle('filled', !!el.value);
+  if (el.value) {
+    const boxes=document.getElementById(rowId).querySelectorAll('.pin-box');
+    if (idx<3) boxes[idx+1].focus();
+    else { el.blur(); if(rowId==='loginPinRow') doLogin(); }
+  }
+}
+
+function pinKey(e, el, rowId, idx) {
+  if (e.key==='Backspace'&&!el.value) {
+    const boxes=document.getElementById(rowId).querySelectorAll('.pin-box');
+    if (idx>0) { boxes[idx-1].value=''; boxes[idx-1].classList.remove('filled'); boxes[idx-1].focus(); }
+  }
+}
+
+function getPinValue(rowId) {
+  return Array.from(document.getElementById(rowId).querySelectorAll('.pin-box'))
+    .map(b=>b.value).join('');
+}
+
+function clearPinRow(rowId) {
+  document.getElementById(rowId).querySelectorAll('.pin-box')
+    .forEach(b=>{b.value='';b.classList.remove('filled');});
+}
+
+function focusPinRow(rowId) {
+  document.getElementById(rowId).querySelector('.pin-box')?.focus();
+}
+
+function togglePinVisibility(rowId, btn) {
+  const boxes = document.getElementById(rowId).querySelectorAll('.pin-box');
+  const isHidden = boxes[0].type !== 'text';
+  boxes.forEach(b => b.type = isHidden ? 'text' : 'password');
+  btn.textContent = isHidden ? '🙈 Hide PIN' : '👁 Show PIN';
+}
+
+// ── UI helpers ────────────────────────────────────────────────
+function showErr(id, msg) {
+  const el=document.getElementById(id);
+  el.textContent='⚠️ '+msg; el.style.display='block';
+}
+
+function setBtnLoad(btnId, spinId, labelId, on, label) {
+  document.getElementById(btnId).disabled=on;
+  document.getElementById(spinId).style.display=on?'block':'none';
+  document.getElementById(labelId).textContent=label;
+}
+
+function showToast(msg, type='ok') {
+  const t=document.createElement('div');
+  t.className=`toast-item ${type}`;
+  t.innerHTML=`<span>${type==='ok'?'✅':'❌'}</span><span>${msg}</span>`;
+  document.getElementById('toasts').appendChild(t);
+  setTimeout(()=>{t.style.opacity='0';t.style.transition='opacity .3s';setTimeout(()=>t.remove(),300);},4000);
+}
+
+function emptyState(icon,title,sub) {
+  return `<div class="history-empty"><span class="history-empty-icon">${icon}</span><div class="history-empty-text">${title}</div><div style="font-size:14px;color:var(--text3)">${sub}</div></div>`;
+}
+
+function fmtMoney(n){return Number(n||0).toLocaleString('en-IN');}
+function esc(s){const d=document.createElement('div');d.textContent=s;return d.innerHTML;}
+function fmtDate(d){if(!d)return'';const dt=d instanceof Date?d:new Date(d);if(isNaN(dt))return'';return dt.toISOString().split('T')[0];}
+
+document.getElementById('confirmOverlay').addEventListener('click',e=>{if(e.target===e.currentTarget)closeConfirm();});
+document.getElementById('successOverlay').addEventListener('click',e=>{if(e.target===e.currentTarget)closeSuccess();});
+</script>
+</body>
+</html>
