@@ -1,0 +1,1337 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>EduRenew — Client Generator</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=JetBrains+Mono:wght@400;500&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#08090d;--s1:#0d0e14;--s2:#12131c;--border:#1a1c28;--border2:#222536;
+  --text:#dde0ef;--text2:#7a7e9a;--text3:#3d4060;
+  --accent:#5b6cf5;--accent2:#7b8af8;--green:#22c55e;--amber:#f59e0b;--red:#ef4444;
+  --mono:'JetBrains Mono',monospace;--sans:'DM Sans',sans-serif;--display:'Syne',sans-serif;
+  --r:12px;--r-sm:8px;
+}
+body{font-family:var(--sans);background:var(--bg);color:var(--text);min-height:100vh;font-size:14px;line-height:1.6}
+body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellipse 60% 40% at 70% 10%,rgba(91,108,245,.07),transparent),radial-gradient(ellipse 50% 30% at 20% 80%,rgba(34,197,94,.04),transparent);pointer-events:none;z-index:0}
+.container{max-width:920px;margin:0 auto;padding:40px 24px;position:relative;z-index:1}
+.header{text-align:center;margin-bottom:48px}
+.header-badge{display:inline-flex;align-items:center;gap:7px;background:rgba(91,108,245,.1);border:1px solid rgba(91,108,245,.25);border-radius:20px;padding:5px 14px;font-family:var(--mono);font-size:11px;color:var(--accent2);margin-bottom:18px;letter-spacing:.5px}
+.header-badge::before{content:'';width:6px;height:6px;border-radius:50%;background:var(--accent);flex-shrink:0}
+.header-title{font-family:var(--display);font-size:42px;font-weight:800;letter-spacing:-1.5px;color:var(--text);line-height:1.1;margin-bottom:10px}
+.header-title span{color:var(--accent2)}
+.header-sub{font-size:15px;color:var(--text2);line-height:1.7;max-width:580px;margin:0 auto}
+.card{background:var(--s1);border:1px solid var(--border);border-radius:var(--r);padding:28px;margin-bottom:20px;transition:border-color .2s}
+.card:hover{border-color:var(--border2)}
+.card-header{display:flex;align-items:center;gap:10px;margin-bottom:22px}
+.card-num{width:28px;height:28px;border-radius:50%;background:rgba(91,108,245,.12);border:1px solid rgba(91,108,245,.25);display:flex;align-items:center;justify-content:center;font-family:var(--mono);font-size:12px;color:var(--accent2);flex-shrink:0}
+.card-title{font-family:var(--display);font-size:16px;font-weight:700;color:var(--text)}
+.card-sub{font-size:12px;color:var(--text3);margin-top:1px}
+.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.form-group{margin-bottom:0}
+.form-label{font-family:var(--mono);font-size:9px;letter-spacing:1px;text-transform:uppercase;color:var(--text2);display:block;margin-bottom:5px}
+.req{color:var(--red)}
+.form-input,.form-select{width:100%;background:var(--bg);border:1px solid var(--border);border-radius:var(--r-sm);padding:10px 13px;color:var(--text);font-family:var(--mono);font-size:13px;outline:none;transition:border-color .15s,box-shadow .15s}
+.form-input::placeholder{color:var(--text3);font-family:var(--sans);font-size:12px}
+.form-input:focus,.form-select:focus{border-color:var(--accent);box-shadow:0 0 0 3px rgba(91,108,245,.1)}
+.form-hint{font-size:11px;color:var(--text3);margin-top:4px;line-height:1.5}
+.color-row{display:flex;align-items:center;gap:10px}
+.color-row input[type=color]{width:40px;height:38px;padding:2px;background:var(--bg);border:1px solid var(--border);border-radius:6px;cursor:pointer;flex-shrink:0}
+.color-row .form-input{flex:1}
+.color-preview{width:38px;height:38px;border-radius:6px;border:1px solid var(--border);flex-shrink:0;transition:background .2s}
+.divider{height:1px;background:var(--border);margin:22px 0}
+.section-label{font-family:var(--display);font-size:14px;font-weight:700;color:var(--text);margin-bottom:5px}
+.section-hint{font-size:12px;color:var(--text2);line-height:1.7;margin-bottom:14px}
+.api-test-row{display:flex;gap:10px;margin-top:12px;align-items:center}
+.btn-test{background:rgba(91,108,245,.15);border:1px solid rgba(91,108,245,.3);color:var(--accent2);font-family:var(--mono);font-size:12px;padding:9px 18px;border-radius:var(--r-sm);cursor:pointer;white-space:nowrap;display:flex;align-items:center;gap:7px;transition:all .15s;flex-shrink:0}
+.btn-test:hover{background:rgba(91,108,245,.25)}
+.btn-test:disabled{opacity:.4;cursor:not-allowed}
+.api-status{padding:9px 13px;border-radius:var(--r-sm);font-size:12px;font-family:var(--mono);display:none;align-items:center;gap:7px;flex:1;line-height:1.5}
+.api-status.ok{background:rgba(34,197,94,.07);border:1px solid rgba(34,197,94,.2);color:var(--green);display:flex}
+.api-status.err{background:rgba(239,68,68,.07);border:1px solid rgba(239,68,68,.2);color:var(--red);display:flex}
+.api-status.loading{background:rgba(91,108,245,.07);border:1px solid rgba(91,108,245,.2);color:var(--accent2);display:flex}
+.alert{padding:10px 14px;border-radius:var(--r-sm);font-size:12px;margin-bottom:16px;display:flex;align-items:flex-start;gap:8px;line-height:1.6}
+.alert-info{background:rgba(91,108,245,.07);border:1px solid rgba(91,108,245,.2);color:var(--accent2)}
+.alert-warn{background:rgba(245,158,11,.07);border:1px solid rgba(245,158,11,.2);color:var(--amber)}
+.generate-btn{width:100%;background:var(--accent);color:#fff;font-family:var(--display);font-size:15px;font-weight:700;padding:16px;border:none;border-radius:var(--r-sm);cursor:pointer;display:flex;align-items:center;justify-content:center;gap:10px;transition:all .2s;letter-spacing:-.2px;margin-top:20px}
+.generate-btn:hover:not(:disabled){background:var(--accent2);transform:translateY(-2px);box-shadow:0 8px 32px rgba(91,108,245,.3)}
+.generate-btn:disabled{opacity:.5;cursor:not-allowed}
+#output{display:none}
+.output-card{background:var(--s1);border:1.5px solid rgba(91,108,245,.3);border-radius:var(--r);overflow:hidden;margin-bottom:20px}
+.output-header{background:rgba(91,108,245,.08);padding:14px 20px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid rgba(91,108,245,.15)}
+.output-title{font-family:var(--mono);font-size:12px;color:var(--accent2);font-weight:500}
+.copy-btn{background:rgba(91,108,245,.15);border:1px solid rgba(91,108,245,.3);color:var(--accent2);font-family:var(--mono);font-size:11px;padding:6px 14px;border-radius:6px;cursor:pointer;transition:all .15s}
+.copy-btn:hover{background:rgba(91,108,245,.25)}
+.copy-btn.copied{background:rgba(34,197,94,.1);border-color:rgba(34,197,94,.3);color:var(--green)}
+.code-area{font-family:var(--mono);font-size:11.5px;color:#c8d0e8;background:var(--bg);padding:20px;max-height:480px;overflow-y:auto;white-space:pre;line-height:1.65}
+.code-area::-webkit-scrollbar{width:6px}
+.code-area::-webkit-scrollbar-thumb{background:var(--border2);border-radius:3px}
+.deploy-steps{counter-reset:ds;list-style:none;display:flex;flex-direction:column;gap:10px}
+.deploy-step{display:flex;gap:12px;align-items:flex-start;padding:12px 16px;background:var(--s2);border:1px solid var(--border);border-radius:var(--r-sm);counter-increment:ds}
+.deploy-step::before{content:counter(ds);min-width:24px;height:24px;border-radius:50%;background:rgba(91,108,245,.12);border:1px solid rgba(91,108,245,.25);display:flex;align-items:center;justify-content:center;font-family:var(--mono);font-size:11px;color:var(--accent2);flex-shrink:0;margin-top:1px}
+.dst{font-size:13px;color:var(--text2);line-height:1.65}
+.dst strong{color:var(--text)}
+.dst code{font-family:var(--mono);font-size:11px;background:var(--bg);border:1px solid var(--border);padding:1px 6px;border-radius:4px;color:var(--accent2)}
+.url-box{background:var(--s2);border:1px solid var(--border);border-radius:var(--r-sm);padding:14px 16px}
+.url-label{font-family:var(--mono);font-size:9px;letter-spacing:1px;text-transform:uppercase;color:var(--text3);margin-bottom:5px}
+.url-val{font-family:var(--mono);font-size:11px;color:var(--accent2);word-break:break-all;line-height:1.5}
+.alert-success{background:rgba(34,197,94,.07);border:1px solid rgba(34,197,94,.2);color:var(--green)}
+.spin-sm{width:13px;height:13px;border:2px solid rgba(123,138,248,.3);border-top-color:var(--accent2);border-radius:50%;animation:sp .6s linear infinite;flex-shrink:0}
+@keyframes sp{to{transform:rotate(360deg)}}
+.phase-label{display:flex;align-items:center;gap:12px;margin:32px 0 14px;padding:0 4px}
+.phase-num{background:var(--accent);color:#fff;font-family:var(--mono);font-size:10px;font-weight:600;padding:3px 10px;border-radius:20px;letter-spacing:.5px;white-space:nowrap}
+.phase-title{font-family:var(--display);font-size:18px;font-weight:700;color:var(--text);letter-spacing:-.3px}
+.tab-nav{display:flex;gap:0;border-bottom:1px solid var(--border);margin-bottom:32px}
+.tab-btn{background:none;border:none;border-bottom:2px solid transparent;color:var(--text3);font-family:var(--display);font-size:14px;font-weight:600;padding:12px 22px;cursor:pointer;transition:all .15s;margin-bottom:-1px;letter-spacing:-.2px}
+.tab-btn:hover{color:var(--text2)}
+.tab-btn.active{color:var(--text);border-bottom-color:var(--accent)}
+.tab-pane{display:none}
+.tab-pane.active{display:block}
+.log-table{width:100%;border-collapse:collapse;font-size:12px}
+.log-table th{font-family:var(--mono);font-size:9px;letter-spacing:1px;text-transform:uppercase;color:var(--text3);padding:10px 14px;text-align:left;border-bottom:1px solid var(--border);background:var(--s2);white-space:nowrap}
+.log-table td{padding:10px 14px;border-bottom:1px solid var(--border);vertical-align:middle}
+.log-table tr:last-child td{border-bottom:none}
+.log-table tr:hover td{background:rgba(91,108,245,.04)}
+.log-status{padding:10px 14px;border-radius:var(--r-sm);font-size:12px;font-family:var(--mono);display:flex;align-items:center;gap:8px;line-height:1.5;margin-bottom:14px}
+.log-status.ok{background:rgba(34,197,94,.07);border:1px solid rgba(34,197,94,.2);color:var(--green)}
+.log-status.err{background:rgba(239,68,68,.07);border:1px solid rgba(239,68,68,.2);color:var(--red)}
+.log-status.loading{background:rgba(91,108,245,.07);border:1px solid rgba(91,108,245,.2);color:var(--accent2)}
+@media(max-width:640px){.form-grid{grid-template-columns:1fr}.header-title{font-size:28px}.tab-btn{padding:10px 14px;font-size:13px}}
+</style>
+</head>
+<body>
+<div class="container">
+
+<div class="header">
+  <div class="header-badge">EduRenew — Client Generator</div>
+  <div class="header-title">EduRenew <span>Studio</span></div>
+  <div class="header-sub">Onboard new clients and track all deployments from one place.</div>
+</div>
+
+<nav class="tab-nav">
+  <button class="tab-btn active" onclick="switchTab('generate')">⚙ Generate &amp; Deploy</button>
+  <button class="tab-btn" onclick="switchTab('log')">📊 Client Log</button>
+</nav>
+
+<!-- TAB: GENERATE -->
+<div class="tab-pane active" id="tab-generate">
+
+<div class="phase-label">
+  <div class="phase-num">Phase 1</div>
+  <div class="phase-title">Fill client details &amp; generate Code.gs</div>
+</div>
+
+<div class="card">
+  <div class="card-header">
+    <div class="card-num">1</div>
+    <div>
+      <div class="card-title">Client identity</div>
+      <div class="card-sub">Org details — displayed in the portal UI</div>
+    </div>
+  </div>
+  <div class="form-grid">
+    <div class="form-group">
+      <label class="form-label">Org ID <span class="req">*</span></label>
+      <input class="form-input" id="orgId" placeholder="e.g. 123456">
+      <div class="form-hint">Passed to the transactions API</div>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Org Name <span class="req">*</span></label>
+      <input class="form-input" id="orgName" placeholder="e.g. Wisdom Nursing Classes">
+      <div class="form-hint">Shown in admin and student portal header</div>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Brand colour</label>
+      <div class="color-row">
+        <input type="color" id="colorPicker" value="#f5a623" oninput="syncColor(this.value)">
+        <input class="form-input" id="colorHex" value="#f5a623" maxlength="7" placeholder="#f5a623" oninput="syncColorText(this.value)">
+        <div class="color-preview" id="colorPreview" style="background:#f5a623"></div>
+      </div>
+      <div class="form-hint">Accent colour used in both portals</div>
+    </div>
+  </div>
+</div>
+
+<div class="card">
+  <div class="card-header">
+    <div class="card-num">2</div>
+    <div>
+      <div class="card-title">Google Sheet &amp; Data API</div>
+      <div class="card-sub">One blank Google Sheet per client</div>
+    </div>
+  </div>
+
+  <div class="alert alert-info">
+    <span>ℹ</span>
+    <span>Create a <strong>blank Google Sheet</strong> for this client and paste its ID below. Running <code style="font-family:var(--mono)">setupSheets()</code> creates all tabs, pulls initial data, and registers an hourly sync — automatically.</span>
+  </div>
+
+  <div class="form-grid">
+    <div class="form-group">
+      <label class="form-label">Sheet ID <span class="req">*</span></label>
+      <input class="form-input" id="sheetId" placeholder="1EVstp-L6adxrbJaBtrUk...">
+      <div class="form-hint">From the URL: …/spreadsheets/d/<strong>SHEET_ID</strong>/edit</div>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Transactions tab name</label>
+      <input class="form-input" id="txnTab" value="Transactions" placeholder="Transactions">
+      <div class="form-hint">Tab where synced transaction data will be written</div>
+    </div>
+  </div>
+
+  <div class="divider"></div>
+
+  <div class="section-label">Data API</div>
+  <div class="section-hint">Transactions are pulled from the Redash query endpoint as a CSV every hour.</div>
+
+  <div class="form-grid">
+    <div class="form-group">
+      <label class="form-label">Query ID <span class="req">*</span></label>
+      <input class="form-input" id="queryId" placeholder="e.g. 17827" oninput="updateUrlPreview()">
+      <div class="form-hint">/api/queries/<strong>{queryId}</strong>/results.csv</div>
+    </div>
+    <div class="form-group">
+      <label class="form-label">API Key <span class="req">*</span></label>
+      <input class="form-input" id="apiKey" placeholder="j9HZJ7JVozyjWQWH..." type="password" autocomplete="off" oninput="updateUrlPreview()">
+      <div class="form-hint">Stored only in Code.gs</div>
+    </div>
+  </div>
+
+  <div style="margin-top:12px">
+    <div class="form-label" style="display:block;margin-bottom:6px">Full API URL (auto-built)</div>
+    <div id="urlPreview" style="font-family:var(--mono);font-size:11px;background:var(--bg);border:1px solid var(--border);border-radius:var(--r-sm);padding:10px 13px;word-break:break-all;line-height:1.6;color:var(--text3)">Fill in Query ID and API Key above to see the full URL</div>
+  </div>
+
+  <div class="api-test-row">
+    <button class="btn-test" id="testBtn" onclick="testApi()">✓ Validate inputs</button>
+    <div class="api-status" id="apiStatus"></div>
+  </div>
+</div>
+
+<button class="generate-btn" id="genBtn" onclick="generate()">
+  &#9655; Generate Code.gs
+</button>
+
+<!-- OUTPUT -->
+<div id="output">
+  <div style="height:28px"></div>
+  <div class="alert alert-success">✓ <span><strong>Code.gs generated.</strong> Copy it and follow the deployment steps below.</span></div>
+
+  <div class="output-card">
+    <div class="output-header">
+      <span class="output-title">Code.gs — paste into Google Apps Script</span>
+      <button class="copy-btn" id="copyBtn" onclick="copyCode()">Copy all</button>
+    </div>
+    <div class="code-area" id="codeOut"></div>
+  </div>
+
+  <div class="output-card" style="margin-top:12px">
+    <div class="output-header">
+      <span class="output-title">Shell.html — the <strong style="color:#fff">only</strong> HTML file needed in Apps Script</span>
+      <button class="copy-btn" id="copyShellBtn" onclick="copyShell()">Copy</button>
+    </div>
+    <div class="code-area" id="shellOut" style="max-height:120px"></div>
+  </div>
+
+  <div class="alert alert-info" style="margin-top:8px;margin-bottom:0">
+    <span>ℹ</span>
+    <span><strong>Shell.html</strong> is the only HTML file needed in Apps Script. It fetches <code style="font-family:var(--mono)">Index.html</code> and <code style="font-family:var(--mono)">Student_Demo.html</code> from GitHub automatically.</span>
+  </div>
+
+  <div class="phase-label" style="margin-top:8px">
+    <div class="phase-num">Phase 2</div>
+    <div class="phase-title">Add to Apps Script, run setup &amp; deploy</div>
+  </div>
+
+  <div class="card">
+    <div class="card-header">
+      <div class="card-num" style="background:rgba(34,197,94,.1);border-color:rgba(34,197,94,.3);color:var(--green)">→</div>
+      <div><div class="card-title">Deployment steps</div><div class="card-sub">One-time per client — takes about 3 minutes</div></div>
+    </div>
+    <div class="alert alert-info" style="margin-bottom:16px">
+      <span>ℹ</span>
+      <span>Only <strong>2 files</strong> needed in Apps Script: <code style="font-family:var(--mono)">Code.gs</code> + <code style="font-family:var(--mono)">Shell.html</code>. No other HTML files required.</span>
+    </div>
+    <ol class="deploy-steps">
+      <li class="deploy-step"><div class="dst">Open the client's blank Google Sheet → <strong>Extensions → Apps Script</strong></div></li>
+      <li class="deploy-step"><div class="dst">Delete everything in <code>Code.gs</code> → paste the <strong>Code.gs</strong> generated above → <strong>Save (Ctrl+S)</strong></div></li>
+      <li class="deploy-step"><div class="dst">Click <strong>+</strong> next to Files → <strong>HTML</strong> → name it exactly <code>Shell</code> → paste the <strong>Shell.html</strong> generated above → Save.</div></li>
+      <li class="deploy-step"><div class="dst">In the function dropdown select <code>setupSheets</code> → click <strong>Run</strong> → grant permissions when prompted.<br><span style="font-size:12px;color:var(--text3)">Creates all tabs, pulls initial data, and registers hourly sync trigger.</span></div></li>
+      <li class="deploy-step"><div class="dst"><strong>Deploy → New deployment → Web App</strong><br>Execute as: <strong>Me</strong> | Who has access: <strong>Anyone</strong> → Deploy → <strong>copy the Web App URL</strong></div></li>
+    </ol>
+  </div>
+
+  <div class="phase-label">
+    <div class="phase-num">Phase 3</div>
+    <div class="phase-title">Paste Web App URL → register client</div>
+  </div>
+
+  <div class="card">
+    <div class="card-header">
+      <div class="card-num" style="background:rgba(34,197,94,.1);border-color:rgba(34,197,94,.3);color:var(--green)">✓</div>
+      <div>
+        <div class="card-title">Web App URL → portal links → master sheet</div>
+        <div class="card-sub">Paste the URL from step 5 above</div>
+      </div>
+    </div>
+
+    <div class="section-label" style="margin-bottom:6px">Web App URL (from Apps Script deploy)</div>
+    <div class="section-hint">Both portal links auto-generate instantly below.</div>
+    <input class="form-input" id="webAppUrl" placeholder="https://script.google.com/macros/s/AKfycbw.../exec" oninput="onWebAppUrlInput(this.value)" style="margin-bottom:14px">
+
+    <div id="urlPreviewCard" style="display:none;margin-bottom:18px">
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+        <div class="url-box">
+          <div class="url-label">🔒 Admin portal</div>
+          <div class="url-val" id="adminUrlPreview"></div>
+          <button onclick="copyUrl('adminUrlPreview')" style="margin-top:8px;background:none;border:1px solid var(--border2);color:var(--accent2);font-family:var(--mono);font-size:10px;padding:4px 10px;border-radius:4px;cursor:pointer">Copy</button>
+        </div>
+        <div class="url-box">
+          <div class="url-label">🎓 Student portal</div>
+          <div class="url-val" id="studentUrlPreview"></div>
+          <button onclick="copyUrl('studentUrlPreview')" style="margin-top:8px;background:none;border:1px solid var(--border2);color:var(--accent2);font-family:var(--mono);font-size:10px;padding:4px 10px;border-radius:4px;cursor:pointer">Copy</button>
+        </div>
+      </div>
+    </div>
+
+    <div id="masterStatus" style="margin-bottom:10px"></div>
+
+    <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center">
+      <button class="btn-test" id="saveClientBtn" onclick="saveClient()" style="background:var(--accent);border-color:var(--accent);color:#fff;padding:10px 22px;font-size:13px;display:none">
+        + Save to master sheet &amp; log
+      </button>
+      <button class="btn-test" onclick="copyBothUrls()" style="font-size:13px;display:none" id="copyBothBtn">
+        Copy both links
+      </button>
+    </div>
+  </div>
+</div>
+
+</div><!-- /tab-generate -->
+
+<!-- TAB: CLIENT LOG -->
+<div class="tab-pane" id="tab-log">
+  <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;margin-bottom:20px">
+    <div>
+      <div style="font-family:var(--display);font-size:22px;font-weight:800;letter-spacing:-.5px;color:var(--text)">Onboarded Clients</div>
+      <div style="font-size:13px;color:var(--text3);margin-top:3px">Live data from master sheet + local browser cache</div>
+    </div>
+    <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap">
+      <span id="logRowCount" style="font-family:var(--mono);font-size:11px;color:var(--text3)"></span>
+      <button class="btn-test" onclick="pullFromSheet()" id="pullBtn">↺ Pull from master sheet</button>
+      <button onclick="clearLocalLog()" style="background:none;border:1px solid var(--border);color:var(--text3);font-family:var(--mono);font-size:11px;padding:8px 14px;border-radius:var(--r-sm);cursor:pointer;white-space:nowrap">Clear local cache</button>
+    </div>
+  </div>
+
+  <div id="logStatus" style="display:none" class="log-status"></div>
+
+  <div class="card" style="padding:0;overflow:hidden">
+    <div style="overflow-x:auto">
+      <table class="log-table" id="logTable">
+        <thead>
+          <tr>
+            <th>Date</th><th>Org name</th><th>Org ID</th><th>Sheet ID</th>
+            <th>Query ID</th><th>Admin portal</th><th>Student portal</th><th>Notes</th>
+          </tr>
+        </thead>
+        <tbody id="logTableBody"></tbody>
+      </table>
+    </div>
+    <div id="logEmpty" style="padding:48px;text-align:center;color:var(--text3);font-size:13px">
+      <div style="font-size:32px;margin-bottom:12px">📊</div>
+      <div style="font-family:var(--display);font-weight:700;color:var(--text2);margin-bottom:6px">No clients yet</div>
+      <div>Click <strong style="color:var(--text)">Pull from master sheet</strong> to load all onboarded clients.</div>
+    </div>
+  </div>
+</div>
+
+</div><!-- /container -->
+
+<script>
+// ── Constants ────────────────────────────────────────────────
+var MASTER_LOGGER_URL   = 'https://script.google.com/macros/s/AKfycbyP2tZYPLU_rBSaWkFy8ey0wmxO53p3ZAqM1PfHwgh91SMXiJvdli9jQ2sk_bZdTbvGew/exec';
+var CENTRAL_ADMIN_URL   = 'https://cdn.jsdelivr.net/gh/classplussupport-bot/EduRenew@main/Index.html';
+var CENTRAL_STUDENT_URL = 'https://cdn.jsdelivr.net/gh/classplussupport-bot/EduRenew@main/Student_Demo.html';
+
+var COLS = [
+  {f:'name',p:'name'},{f:'phone',p:'mobile'},{f:'email',p:'email'},
+  {f:'course',p:'CourseName'},{f:'courseId',p:'CourseID'},{f:'courseUrl',p:'Course_URL'},
+  {f:'orgId',p:'OrgID'},{f:'orgName',p:'OrgName'},
+  {f:'transactionId',p:'transactionid'},{f:'paymentId',p:'PaymentID'},
+  {f:'transDate',p:'TransDate'},{f:'amountPaid',p:'Amount_Paid'},
+  {f:'currentPrice',p:'Current_CoursePrice'},{f:'couponDiscount',p:'CouponDiscount?'},
+  {f:'discountPct',p:'Discount_(%)'},{f:'expiryDate',p:'expiryDate'},
+  {f:'isExpired',p:'isExpired'},{f:'state',p:'state'},
+  {f:'entryType',p:'EntryType'},{f:'parentTxnId',p:'ParentTxnID'},
+  {f:'processedBy',p:'ProcessedBy'},{f:'renewalNotes',p:'RenewalNotes'},
+  {f:'systemTimestamp',p:'SystemTimestamp'}
+];
+
+// ── Colour picker ────────────────────────────────────────────
+function syncColor(v){document.getElementById('colorHex').value=v;document.getElementById('colorPreview').style.background=v;}
+function syncColorText(v){if(/^#[0-9a-fA-F]{6}$/.test(v)){document.getElementById('colorPicker').value=v;document.getElementById('colorPreview').style.background=v;}}
+
+// ── API URL ──────────────────────────────────────────────────
+function buildApiUrl(){
+  var qid=document.getElementById('queryId').value.trim();
+  var key=document.getElementById('apiKey').value.trim();
+  if(!qid||!key) return '';
+  return 'http://data.classplus.co/api/queries/'+encodeURIComponent(qid)+'/results.csv?api_key='+encodeURIComponent(key);
+}
+function updateUrlPreview(){
+  var url=buildApiUrl(); var el=document.getElementById('urlPreview');
+  if(url){el.textContent=url;el.style.color='var(--accent2)';}
+  else{el.textContent='Fill in Query ID and API Key above to see the full URL';el.style.color='var(--text3)';}
+}
+function testApi(){
+  var qid=document.getElementById('queryId').value.trim();
+  var key=document.getElementById('apiKey').value.trim();
+  var btn=document.getElementById('testBtn');
+  if(!qid||!key){setStatus('err','Fill in Query ID and API Key first');return;}
+  setStatus('loading','<div class="spin-sm"></div>&nbsp;Validating...');
+  btn.disabled=true;
+  setTimeout(function(){
+    btn.disabled=false;
+    var url=buildApiUrl();
+    var masked=url.replace(encodeURIComponent(key),'***'+key.slice(-4));
+    setStatus('ok','✓ Inputs look valid. URL: <span style="word-break:break-all;opacity:.8">'+esc(masked)+'</span>');
+  },600);
+}
+function setStatus(t,h){var el=document.getElementById('apiStatus');el.className='api-status '+t;el.innerHTML=h;}
+
+// ── GENERATE ─────────────────────────────────────────────────
+function generate(){
+  var orgId  =document.getElementById('orgId').value.trim();
+  var orgName=document.getElementById('orgName').value.trim();
+  var sheetId=document.getElementById('sheetId').value.trim();
+  var txnTab =document.getElementById('txnTab').value.trim()||'Transactions';
+  var color  =document.getElementById('colorHex').value.trim()||'#f5a623';
+  var queryId=document.getElementById('queryId').value.trim();
+  var apiKey =document.getElementById('apiKey').value.trim();
+  var apiUrl =buildApiUrl();
+
+  if(!orgId||!orgName||!sheetId||!queryId||!apiKey){
+    alert('Please fill in all required fields: Org ID, Org Name, Sheet ID, Query ID, API Key');return;
+  }
+
+  var btn=document.getElementById('genBtn');
+  btn.disabled=true;btn.textContent='Generating...';
+
+  var colLines=COLS.map(function(c){
+    var key=c.f+':'; while(key.length<18)key+=' ';
+    return '    '+key+"'"+c.p+"'";
+  }).join(',\n');
+
+  var now=new Date().toISOString().slice(0,10);
+  var idxT=5, idxE=18;
+
+  // ── Code.gs template ────────────────────────────────────────
+  var code=[
+'// ============================================================',
+'//  EduRenew - Code.gs',
+'//  Client: '+orgName+' ('+orgId+')',
+'//  Generated: '+now,
+'// ============================================================',
+'',
+'var CLIENT = {',
+"  orgId:          '"+orgId+"',",
+"  orgName:        '"+orgName+"',",
+"  sheetId:        '"+sheetId+"',",
+"  txnTab:         '"+txnTab+"',",
+"  primaryColor:   '"+color+"',",
+'  renewWindowPre:  15,',
+'  renewWindowPost: 15,',
+'',
+'  api: {',
+"    url: '"+apiUrl+"'",
+'  },',
+'',
+'  col: {',
+colLines,
+'  },',
+'',
+'  colIdx: {',
+'    transDate:  '+idxT+',',
+'    expiryDate: '+idxE,
+'  }',
+'};',
+'',
+'var TABS = {',
+'  TXN:     CLIENT.txnTab,',
+"  LOGS:    'RenewalLogs',",
+"  COUPONS: 'CouponConfig',",
+"  ERRORS:  'ErrorLogs',",
+"  PINS:    'StudentPINs'",
+'};',
+'',
+'// ============================================================',
+'//  doGet — Shell.html fetches UI from GitHub automatically.',
+'//  Admin:   /exec          Student: /exec?page=student',
+'// ============================================================',
+"var CENTRAL_ADMIN_URL   = '"+CENTRAL_ADMIN_URL+"';",
+"var CENTRAL_STUDENT_URL = '"+CENTRAL_STUDENT_URL+"';",
+'',
+'function doGet(e) {',
+"  var page  = (e && e.parameter && e.parameter.page) || 'admin';",
+"  var title = page === 'student' ? CLIENT.orgName+' - Student Portal' : CLIENT.orgName+' - Admin';",
+"  var tpl   = HtmlService.createTemplateFromFile('Shell');",
+'  tpl.page  = page;',
+'  return tpl.evaluate().setTitle(title).setXFrameOptionsMode(HtmlService.XFrameOptionsMode.ALLOWALL);',
+'}',
+'',
+'function getClientConfig() {',
+'  return {',
+'    orgId:           CLIENT.orgId,',
+'    name:            CLIENT.orgName,',
+'    primaryColor:    CLIENT.primaryColor,',
+'    renewWindowPre:  CLIENT.renewWindowPre,',
+'    renewWindowPost: CLIENT.renewWindowPost',
+'  };',
+'}',
+'',
+'// ============================================================',
+'//  CLASSPLUS API SYNC — runs every hour automatically',
+'// ============================================================',
+'function syncTransactionsHourly() {',
+'  try {',
+'    var rows=fetchAllTransactions_();',
+"    if(!rows.length){logError('syncTransactionsHourly','API returned 0 rows','');return;}",
+'    writeTransactionsToSheet_(rows);',
+"  } catch(e){logError('syncTransactionsHourly',e.message,'');}",
+'}',
+'function fetchAllTransactions_() {',
+"  var resp=UrlFetchApp.fetch(CLIENT.api.url,{method:'GET',muteHttpExceptions:true});",
+'  if(resp.getResponseCode()!==200){',
+"    logError('fetchAllTransactions_','HTTP '+resp.getResponseCode(),resp.getContentText().slice(0,200));",
+'    return [];',
+'  }',
+'  var csv=resp.getContentText();',
+'  if(!csv||!csv.trim()) return [];',
+'  return parseCsv_(csv);',
+'}',
+'function parseCsv_(csv) {',
+"  var lines=csv.split('\\n'); var clean=[];",
+'  for(var i=0;i<lines.length;i++){',
+"    var l=lines[i].split('\\r').join('');",
+'    if(l.trim()) clean.push(l);',
+'  }',
+'  if(clean.length<2) return [];',
+'  var headers=splitCsvRow_(clean[0]);',
+'  return clean.slice(1).map(function(line){',
+'    var vals=splitCsvRow_(line),obj={};',
+'    headers.forEach(function(h,i){obj[h]=vals[i]!==undefined?vals[i]:"";});',
+'    return obj;',
+'  });',
+'}',
+'function splitCsvRow_(line) {',
+'  var result=[],cur="",inQ=false,qc=String.fromCharCode(34);',
+'  for(var i=0;i<line.length;i++){',
+'    var ch=line[i];',
+'    if(ch===qc){inQ=!inQ;}',
+'    else if(ch===","&&!inQ){result.push(cur.trim());cur="";}',
+'    else{cur+=ch;}',
+'  }',
+'  result.push(cur.trim());',
+'  return result;',
+'}',
+'function writeTransactionsToSheet_(records) {',
+'  var ss=SpreadsheetApp.openById(CLIENT.sheetId);',
+'  var sh=ss.getSheetByName(TABS.TXN);',
+'  if(!sh){sh=ss.insertSheet(TABS.TXN);}',
+'  var colHeaders=Object.values(CLIENT.col);',
+'  var colFields=Object.keys(CLIENT.col);',
+'  if(sh.getLastRow()<1){',
+'    sh.appendRow(colHeaders);',
+"    sh.getRange(1,1,1,colHeaders.length).setBackground('#1a1a2e').setFontColor('#fff').setFontWeight('bold');",
+'  }',
+'  var lastRow=sh.getLastRow();',
+'  if(lastRow>1) sh.deleteRows(2,lastRow-1);',
+'  var rows=records.map(function(rec){',
+'    return colFields.map(function(field){',
+'      var h=CLIENT.col[field];',
+'      var v=rec[h]!==undefined?rec[h]:(rec[field]!==undefined?rec[field]:"");',
+'      return v!==null&&v!==undefined?String(v):"";',
+'    });',
+'  });',
+'  if(rows.length) sh.getRange(2,1,rows.length,colHeaders.length).setValues(rows);',
+'}',
+'function registerHourlyTrigger_() {',
+"  ScriptApp.getProjectTriggers().forEach(function(t){",
+"    if(t.getHandlerFunction()==='syncTransactionsHourly') ScriptApp.deleteTrigger(t);",
+'  });',
+"  ScriptApp.newTrigger('syncTransactionsHourly').timeBased().everyHours(1).create();",
+'}',
+'',
+'// ============================================================',
+'//  SHEET ACCESSORS',
+'// ============================================================',
+'function getTxnSheet() {',
+'  var sh=SpreadsheetApp.openById(CLIENT.sheetId).getSheetByName(TABS.TXN);',
+"  if(!sh) throw new Error('Transactions tab missing. Run setupSheets() first.');",
+'  return sh;',
+'}',
+'function getSystemSheet(tabName) {',
+'  var sh=SpreadsheetApp.openById(CLIENT.sheetId).getSheetByName(tabName);',
+"  if(!sh) throw new Error('Tab \"'+tabName+'\" missing. Run setupSheets() first.');",
+'  return sh;',
+'}',
+'function buildColIndex(headers) {',
+'  var idx={};',
+'  Object.entries(CLIENT.col).forEach(function(e){idx[e[0]]=headers.indexOf(e[1]);});',
+'  return idx;',
+'}',
+'function getVal(row,idx,field) {',
+'  var i=idx[field];',
+'  return(i>=0&&i<row.length)?row[i]:"";',
+'}',
+'',
+'// ============================================================',
+'//  PIN MANAGEMENT',
+'// ============================================================',
+'function ensurePinsTab() {',
+'  var ss=SpreadsheetApp.openById(CLIENT.sheetId);',
+'  var sh=ss.getSheetByName(TABS.PINS);',
+'  if(!sh){',
+'    sh=ss.insertSheet(TABS.PINS);',
+"    var h=['Phone','Name','PIN','CreatedAt','LastLogin','SessionToken','SessionExpiry'];",
+'    sh.appendRow(h);',
+"    sh.getRange(1,1,1,h.length).setBackground('#1a1a2e').setFontColor('#fff').setFontWeight('bold');",
+'  }',
+'  return sh;',
+'}',
+'function checkStudentPhone(phone) {',
+'  try {',
+'    if(!phone) return {success:false,error:"Phone required"};',
+'    phone=phone.toString().replace(/\\D/g,"").slice(-10);',
+'    var sh=getTxnSheet(),lr=sh.getLastRow(),lc=sh.getLastColumn();',
+'    var found=false,cName="";',
+'    if(lr>=2){',
+'      var h=sh.getRange(1,1,1,lc).getValues()[0].map(function(x){return x.toString().trim();});',
+'      var pi=h.indexOf(CLIENT.col.phone),ni=h.indexOf(CLIENT.col.name);',
+'      if(pi<0) return {success:false,error:"Phone column not found"};',
+'      var cn=Math.max(pi,ni<0?pi:ni)+1;',
+'      var bd=sh.getRange(2,1,lr-1,cn).getValues();',
+'      for(var i=0;i<bd.length;i++){',
+'        if((bd[i][pi]||"").toString().replace(/\\D/g,"").slice(-10)===phone){',
+'          found=true;cName=ni>=0?(bd[i][ni]||"").toString().trim():"";break;',
+'        }',
+'      }',
+'    }',
+'    var ps=ensurePinsTab(),pl=ps.getLastRow(),hasPin=false,pName="";',
+'    if(pl>=2){',
+'      var pd=ps.getRange(2,1,pl-1,3).getValues();',
+'      for(var j=0;j<pd.length;j++){',
+'        if((pd[j][0]||"").toString().replace(/\\D/g,"").slice(-10)===phone){',
+'          hasPin=!!(pd[j][2]&&pd[j][2].toString().trim());',
+'          pName=(pd[j][1]||"").toString().trim();break;',
+'        }',
+'      }',
+'    }',
+'    return {success:true,found:found,hasPin:hasPin,customerName:pName||cName,phone:phone};',
+"  } catch(e){logError('checkStudentPhone',e.message,phone);return {success:false,error:e.message};}",
+'}',
+'function saveStudentPin(phone,name,pin) {',
+'  try {',
+'    if(!phone||!pin) return {success:false,error:"Phone and PIN required"};',
+'    phone=phone.toString().replace(/\\D/g,"").slice(-10);',
+'    pin=pin.toString().trim();name=(name||"").toString().trim();',
+'    if(!/^\\d{4}$/.test(pin)) return {success:false,error:"PIN must be 4 digits"};',
+'    var sh=ensurePinsTab();',
+'    var data=sh.getDataRange().getValues();',
+'    var now=new Date().toISOString();',
+'    for(var i=1;i<data.length;i++){',
+'      if((data[i][0]||"").toString().replace(/\\D/g,"").slice(-10)===phone){',
+'        var n=name||data[i][1]||"";',
+'        sh.getRange(i+1,1,1,7).setValues([[phone,n,pin,data[i][3]||now,now,"",""]]);',
+'        var tokenRes=issueSessionToken(phone);',
+'        return {success:true,customerName:n,phone:phone,token:tokenRes.token||""};',
+'      }',
+'    }',
+'    sh.appendRow([phone,name,pin,now,now,"",""]);',
+'    var tokenRes2=issueSessionToken(phone);',
+'    return {success:true,customerName:name,phone:phone,token:tokenRes2.token||""};',
+"  } catch(e){logError('saveStudentPin',e.message,phone);return {success:false,error:e.message};}",
+'}',
+'function verifyStudentPin(phone,pin) {',
+'  try {',
+'    if(!phone||!pin) return {success:false,error:"Phone and PIN required"};',
+'    phone=phone.toString().replace(/\\D/g,"").slice(-10);',
+'    pin=pin.toString().trim();',
+'    var sh=ensurePinsTab();var data=sh.getDataRange().getValues();',
+'    var now=new Date().toISOString();',
+'    for(var i=1;i<data.length;i++){',
+'      if((data[i][0]||"").toString().replace(/\\D/g,"").slice(-10)===phone){',
+'        if(data[i][2].toString()!==pin) return {success:false,error:"Incorrect PIN. Try again."};',
+'        sh.getRange(i+1,5).setValue(now);',
+'        var tokenRes=issueSessionToken(phone);',
+'        return {success:true,customerName:(data[i][1]||"").toString(),phone:phone,token:tokenRes.token||""};',
+'      }',
+'    }',
+'    return {success:false,error:"No PIN found. Please set a PIN first."};',
+"  } catch(e){logError('verifyStudentPin',e.message,phone);return {success:false,error:e.message};}",
+'}',
+'',
+'// ============================================================',
+'//  SESSION TOKENS — 7-day login persistence',
+'// ============================================================',
+'function issueSessionToken(phone) {',
+'  try {',
+'    phone=phone.toString().replace(/\\D/g,"").slice(-10);',
+'    var token=Utilities.getUuid().replace(/-/g,"")+Utilities.getUuid().replace(/-/g,"");',
+'    var expiry=new Date();expiry.setDate(expiry.getDate()+7);',
+'    var sh=ensurePinsTab();var data=sh.getDataRange().getValues();',
+'    for(var i=1;i<data.length;i++){',
+'      if((data[i][0]||"").toString().replace(/\\D/g,"").slice(-10)===phone){',
+'        sh.getRange(i+1,5).setValue(new Date().toISOString());',
+'        sh.getRange(i+1,6).setValue(token);',
+'        sh.getRange(i+1,7).setValue(expiry.toISOString());',
+'        return {success:true,token:token,expiry:expiry.toISOString()};',
+'      }',
+'    }',
+'    return {success:false,error:"Phone not in PIN store"};',
+"  } catch(e){logError('issueSessionToken',e.message,phone);return {success:false,error:e.message};}",
+'}',
+'function validateSessionToken(phone,token) {',
+'  try {',
+'    if(!phone||!token) return {success:false,error:"Missing"};',
+'    phone=phone.toString().replace(/\\D/g,"").slice(-10);',
+'    var sh=ensurePinsTab();var data=sh.getDataRange().getValues();var now=new Date();',
+'    for(var i=1;i<data.length;i++){',
+'      if((data[i][0]||"").toString().replace(/\\D/g,"").slice(-10)===phone){',
+'        var st=data[i][5]?data[i][5].toString():"";',
+'        var se=data[i][6]?new Date(data[i][6]):null;',
+'        if(st!==token) return {success:false,error:"Invalid session"};',
+'        if(!se||se<now) return {success:false,error:"Session expired"};',
+'        var ne=new Date();ne.setDate(ne.getDate()+7);',
+'        sh.getRange(i+1,7).setValue(ne.toISOString());',
+'        return {success:true,customerName:(data[i][1]||"").toString(),phone:phone};',
+'      }',
+'    }',
+'    return {success:false,error:"Not found"};',
+"  } catch(e){return {success:false,error:e.message};}",
+'}',
+'function logoutStudent(phone) {',
+'  try {',
+'    phone=phone.toString().replace(/\\D/g,"").slice(-10);',
+'    var sh=ensurePinsTab();var data=sh.getDataRange().getValues();',
+'    for(var i=1;i<data.length;i++){',
+'      if((data[i][0]||"").toString().replace(/\\D/g,"").slice(-10)===phone){',
+'        sh.getRange(i+1,6).setValue("");sh.getRange(i+1,7).setValue("");',
+'        return {success:true};',
+'      }',
+'    }',
+'    return {success:true};',
+"  } catch(e){return {success:false,error:e.message};}",
+'}',
+'',
+'// ============================================================',
+'//  SEARCH STUDENT',
+'// ============================================================',
+'function searchUser(phone) {',
+'  try {',
+'    if(!phone) return {success:false,error:"Phone required"};',
+'    phone=phone.toString().replace(/\\D/g,"").slice(-10);',
+'    var sh=getTxnSheet();',
+'    var data=sh.getDataRange().getValues();',
+'    var headers=data[0].map(function(h){return h.toString().trim();});',
+'    var idx=buildColIndex(headers);',
+'    if(idx.phone<0) return {success:false,error:"Phone column not found"};',
+'    var rows=data.slice(1).filter(function(r){',
+'      return(r[idx.phone]||"").toString().replace(/\\D/g,"").slice(-10)===phone;',
+'    });',
+'    if(!rows.length) return {success:false,error:"No records found"};',
+'    var cm={};',
+'    rows.forEach(function(r){',
+'      var course=getVal(r,idx,"course").toString().trim();',
+'      if(!course) return;',
+'      var rawE=getVal(r,idx,"expiryDate")||r[CLIENT.colIdx.expiryDate];',
+'      var rawP=getVal(r,idx,"transDate")||r[CLIENT.colIdx.transDate];',
+'      var ex=cm[course];',
+'      if(!ex||parseSheetDate(rawE)>parseSheetDate(ex._r)){',
+'        var ed=parseSheetDate(rawE);var now=new Date();',
+'        var vd=!isNaN(ed)&&ed.getFullYear()>1971;',
+'        cm[course]={',
+'          _r:rawE,',
+'          transactionId:getVal(r,idx,"transactionId")||getVal(r,idx,"paymentId"),',
+'          name:getVal(r,idx,"name"),phone:getVal(r,idx,"phone"),email:getVal(r,idx,"email"),',
+'          course:course,courseId:getVal(r,idx,"courseId"),orgName:getVal(r,idx,"orgName"),',
+'          courseUrl:getVal(r,idx,"courseUrl"),',
+'          purchaseDate:formatDate(rawP),expiryDate:formatDate(rawE),',
+'          amount:parseFloat(getVal(r,idx,"amountPaid"))||0,',
+'          entryType:getVal(r,idx,"entryType")||"NEW",',
+'          isExpired:vd?ed<now:false,',
+'          daysRemaining:vd?Math.ceil((ed-now)/86400000):0,',
+'          state:getVal(r,idx,"state")',
+'        };',
+'      }',
+'    });',
+'    var courses=Object.values(cm).map(function(c){var x=Object.assign({},c);delete x._r;return x;});',
+'    return {success:true,customerName:(rows[0][idx.name]||"").toString().trim(),',
+'      phone:phone,email:(rows[0][idx.email]||"").toString().trim(),',
+'      courses:courses,totalRecords:rows.length};',
+"  } catch(e){logError('searchUser',e.message,phone);return {success:false,error:e.message};}",
+'}',
+'',
+'// ============================================================',
+'//  COUPON MANAGEMENT',
+'// ============================================================',
+'function getActiveCouponForStudent() {',
+'  try {',
+'    var sh;try{sh=getSystemSheet(TABS.COUPONS);}catch(_){return{success:true,coupon:null};}',
+'    var data=sh.getDataRange().getValues();',
+'    if(data.length<=1) return {success:true,coupon:null};',
+'    var h=data[0];',
+'    var ci={',
+'      code:h.indexOf("CouponCode"),type:h.indexOf("DiscountType"),value:h.indexOf("DiscountValue"),',
+'      minOrder:h.indexOf("MinOrderAmount"),maxDiscount:h.indexOf("MaxDiscount"),',
+'      forType:h.indexOf("ApplicableFor"),validFrom:h.indexOf("ValidFrom"),validTo:h.indexOf("ValidTo"),',
+'      timesUsed:h.indexOf("TimesUsed"),limitTotal:h.indexOf("UsageLimitTotal"),',
+'      isActive:h.indexOf("IsActive"),notes:h.indexOf("Notes")',
+'    };',
+'    var today=new Date(),best=null;',
+'    data.slice(1).forEach(function(r){',
+'      var active=r[ci.isActive];',
+'      if(active!==true&&String(active).toUpperCase()!=="TRUE") return;',
+'      var vF=parseSheetDate(r[ci.validFrom]);var vT=parseSheetDate(r[ci.validTo]);',
+'      if(!isNaN(vF)&&vF>today) return;',
+'      if(!isNaN(vT)&&vT<today) return;',
+'      if((parseInt(r[ci.timesUsed])||0)>=(parseInt(r[ci.limitTotal])||999999)) return;',
+'      var ft=(r[ci.forType]||"").toString().toUpperCase();',
+'      if(ft!=="ALL"&&ft!=="RENEWAL") return;',
+'      var noteStr=ci.notes>=0?r[ci.notes].toString():"";',
+'      var dnMatch=noteStr.match(/\\[DISPLAYNAME:([^\\]]+)\\]/);',
+'      var displayName=dnMatch?dnMatch[1]:r[ci.code].toString().trim();',
+'      var isFlatDiscount=noteStr.indexOf("[FLATDISCOUNT]")>=0;',
+'      var c={',
+'        couponCode:r[ci.code].toString().trim().toUpperCase(),',
+'        displayName:displayName,isFlatDiscount:isFlatDiscount,',
+'        discountType:r[ci.type].toString().trim().toUpperCase(),',
+'        discountValue:parseFloat(r[ci.value])||0,',
+'        maxDiscount:parseFloat(r[ci.maxDiscount])||9999,',
+'        validTo:formatDate(r[ci.validTo]),notes:noteStr',
+'      };',
+'      if(!best||c.discountValue>best.discountValue) best=c;',
+'    });',
+'    return {success:true,coupon:best};',
+"  } catch(e){logError('getActiveCouponForStudent',e.message,'');return {success:true,coupon:null};}",
+'}',
+'function setMonthlyCoupon(payload) {',
+'  try {',
+'    var code=(payload.code||"").toString().trim().toUpperCase().replace(/[^A-Z0-9\\-]/g,"");',
+'    var dtype=(payload.discountType||"PERCENT").toUpperCase();',
+'    var dval=parseFloat(payload.discountValue)||0;',
+'    var cap=parseFloat(payload.maxDiscount)||999999;',
+'    var vF=payload.validFrom||formatDate(new Date());',
+'    var vT=payload.validTo||formatDate(new Date());',
+'    var notes=(payload.notes||"")+" [MONTHLY]";',
+'    if(!code){var d=new Date();code="OFFER-"+(d.getMonth()+1)+d.getFullYear();}',
+'    var sh=getSystemSheet(TABS.COUPONS);',
+'    var ex=sh.getDataRange().getValues();var h=ex[0];',
+'    var ni=h.indexOf("Notes");var ai=h.indexOf("IsActive");var ci2=h.indexOf("CouponCode");',
+'    if(ni>=0&&ai>=0){',
+'      ex.slice(1).forEach(function(r,i){',
+'        if(r[ni]&&r[ni].toString().indexOf("[MONTHLY]")>=0) sh.getRange(i+2,ai+1).setValue(false);',
+'      });',
+'    }',
+'    var existRow=-1;',
+'    ex.slice(1).forEach(function(r,i){',
+'      if(r[ci2]&&r[ci2].toString().trim().toUpperCase()===code) existRow=i+2;',
+'    });',
+'    var row=[code,dtype,dval,0,cap,"ALL","RENEWAL",vF,vT,999999,1,0,true,CLIENT.orgId,notes];',
+'    if(existRow>0){sh.getRange(existRow,1,1,row.length).setValues([row]);}',
+'    else{sh.appendRow(row);}',
+'    return {success:true,couponCode:code,message:"Offer saved. Eligible students see it automatically."};',
+"  } catch(e){logError('setMonthlyCoupon',e.message,'');return {success:false,error:e.message};}",
+'}',
+'function getMonthlyCoupons() {',
+'  try {',
+'    var sh;try{sh=getSystemSheet(TABS.COUPONS);}catch(_){return{success:true,coupons:[]};}',
+'    var data=sh.getDataRange().getValues();var h=data[0];var ni=h.indexOf("Notes");',
+'    var coupons=data.slice(1).filter(function(r){',
+'      return ni>=0&&r[ni]&&r[ni].toString().indexOf("[MONTHLY]")>=0;',
+'    }).map(function(r){var o={};h.forEach(function(k,i){o[k]=r[i];});return o;}).reverse();',
+'    return {success:true,coupons:coupons};',
+"  } catch(e){return {success:true,coupons:[]};}",
+'}',
+'function listCoupons() {',
+'  try {',
+'    var sh;try{sh=getSystemSheet(TABS.COUPONS);}catch(_){return{success:true,coupons:[]};}',
+'    var data=sh.getDataRange().getValues();',
+'    if(data.length<=1) return {success:true,coupons:[]};',
+'    var h=data[0];',
+'    return {success:true,coupons:data.slice(1).map(function(r,i){',
+'      var o={_row:i+2};h.forEach(function(k,j){o[k]=r[j];});return o;',
+'    })};',
+"  } catch(e){return {success:false,error:e.message};}",
+'}',
+'function deactivateCoupon(rowIndex) {',
+'  try {',
+'    var sh=getSystemSheet(TABS.COUPONS);',
+'    var h=sh.getRange(1,1,1,sh.getLastColumn()).getValues()[0];',
+'    var c=h.indexOf("IsActive")+1;',
+'    if(c<=0) return {success:false,error:"IsActive column not found"};',
+'    var cell=sh.getRange(rowIndex,c);',
+'    var cur=cell.getValue();',
+'    var nv=!(cur===true||String(cur).toUpperCase()==="TRUE");',
+'    cell.setValue(nv);',
+'    return {success:true,isActive:nv};',
+"  } catch(e){logError('deactivateCoupon',e.message,rowIndex);return {success:false,error:e.message};}",
+'}',
+'function validateCoupon(code,phone,amount,entryType,course) {',
+'  try {',
+'    if(!code) return {success:false,error:"No coupon"};',
+'    code=code.toString().trim().toUpperCase();',
+'    phone=phone.toString().replace(/\\D/g,"").slice(-10);',
+'    amount=parseFloat(amount)||0;',
+'    var sh;try{sh=getSystemSheet(TABS.COUPONS);}catch(_){return{success:false,error:"Not set up"};}',
+'    var data=sh.getDataRange().getValues();var h=data[0];',
+'    var ci={code:h.indexOf("CouponCode"),type:h.indexOf("DiscountType"),value:h.indexOf("DiscountValue"),',
+'      minOrder:h.indexOf("MinOrderAmount"),maxDiscount:h.indexOf("MaxDiscount"),',
+'      forType:h.indexOf("ApplicableFor"),validFrom:h.indexOf("ValidFrom"),validTo:h.indexOf("ValidTo"),',
+'      limitTotal:h.indexOf("UsageLimitTotal"),timesUsed:h.indexOf("TimesUsed"),isActive:h.indexOf("IsActive")};',
+'    var row=null,ri=-1;',
+'    data.slice(1).forEach(function(r,i){if(r[ci.code]&&r[ci.code].toString().trim().toUpperCase()===code){row=r;ri=i+2;}});',
+'    if(!row) return {success:false,error:"Coupon not found"};',
+'    if(row[ci.isActive]!==true&&String(row[ci.isActive]).toUpperCase()!=="TRUE") return {success:false,error:"Coupon inactive"};',
+'    var today=new Date();',
+'    var vF=parseSheetDate(row[ci.validFrom]);var vT=parseSheetDate(row[ci.validTo]);',
+'    if(!isNaN(vF)&&vF>today) return {success:false,error:"Not active yet"};',
+'    if(!isNaN(vT)&&vT<today) return {success:false,error:"Expired"};',
+'    if(amount<(parseFloat(row[ci.minOrder])||0)) return {success:false,error:"Min order Rs"+row[ci.minOrder]};',
+'    if((parseInt(row[ci.timesUsed])||0)>=(parseInt(row[ci.limitTotal])||999999)) return {success:false,error:"Limit reached"};',
+'    var dt=row[ci.type].toString().trim().toUpperCase();',
+'    var dv=parseFloat(row[ci.value])||0;',
+'    var md=parseFloat(row[ci.maxDiscount])||999999;',
+'    var disc=dt==="PERCENT"?Math.min((amount*dv)/100,md):dv;',
+'    disc=Math.round(Math.min(disc,amount));',
+'    return {success:true,couponCode:code,discountType:dt,discountValue:dv,',
+'      discountAmount:disc,finalAmount:amount-disc,message:"Saved Rs"+disc,rowIndex:ri};',
+"  } catch(e){logError('validateCoupon',e.message,code);return {success:false,error:e.message};}",
+'}',
+'',
+'// ============================================================',
+'//  PAYMENT REDIRECT',
+'//  Reads Course_URL from student record + appends active coupon.',
+'//  No configuration needed — URL already in your data.',
+'// ============================================================',
+'function getPaymentRedirectUrl(phone,courseName) {',
+'  try {',
+'    phone=phone.toString().replace(/\\D/g,"").slice(-10);',
+'    courseName=courseName.toString().trim();',
+'    var sh=getTxnSheet();',
+'    var data=sh.getDataRange().getValues();',
+'    var headers=data[0].map(function(h){return h.toString().trim();});',
+'    var idx=buildColIndex(headers);',
+'    var urlColIdx=headers.indexOf(CLIENT.col.courseUrl);',
+'    if(urlColIdx<0) return {success:false,error:"Course_URL column not found"};',
+'    var courseUrl="";',
+'    var rows=data.slice(1).filter(function(r){',
+'      return(getVal(r,idx,"phone")||"").toString().replace(/\\D/g,"").slice(-10)===phone&&',
+'             getVal(r,idx,"course").toString().trim().toLowerCase()===courseName.toLowerCase();',
+'    });',
+'    for(var i=0;i<rows.length;i++){',
+'      var u=rows[i][urlColIdx]?rows[i][urlColIdx].toString().trim():"";',
+'      if(u&&u.indexOf("http")===0){courseUrl=u;break;}',
+'    }',
+'    if(!courseUrl) return {success:false,error:"No course URL found. Contact support."};',
+'    var couponResult=getActiveCouponForStudent();',
+'    var coupon=couponResult.coupon;',
+'    var finalUrl=courseUrl;',
+'    if(coupon&&coupon.couponCode&&!coupon.isFlatDiscount){',
+'      var sep=finalUrl.indexOf("?")>=0?"&":"?";',
+'      finalUrl=finalUrl+sep+"coupon="+encodeURIComponent(coupon.couponCode);',
+'    }',
+'    return {success:true,paymentUrl:finalUrl,baseUrl:courseUrl,',
+'      couponCode:coupon&&!coupon.isFlatDiscount?coupon.couponCode:null};',
+"  } catch(e){logError('getPaymentRedirectUrl',e.message,courseName);return {success:false,error:e.message};}",
+'}',
+'',
+'// ============================================================',
+'//  PROCESS RENEWAL',
+'// ============================================================',
+'function processRenewal(body) {',
+'  try {',
+'    var phone=body.phone,course=body.course;',
+'    var entryType=body.entryType,amount=body.amount,ned=body.newExpiryDate;',
+'    if(!phone||!course||!entryType||!amount||!ned) return {success:false,error:"Missing fields"};',
+'    var txnSh=getTxnSheet();',
+'    var logSh;try{logSh=getSystemSheet(TABS.LOGS);}catch(e){return{success:false,error:"RenewalLogs missing"};}',
+'    var search=searchUser(phone);',
+'    if(!search.success) return {success:false,error:"Student not found: "+search.error};',
+'    var cd=search.courses.find(function(c){return c.course===course;})||{};',
+'    var now=new Date();',
+'    var txnId=generateId("TXN");var logId=generateId("LOG");',
+'    var origAmt=parseFloat(amount);var discAmt=parseFloat(body.discountAmount)||0;',
+'    var finalAmt=Math.round((origAmt-discAmt)*100)/100;',
+'    var oldExp=body.oldExpiryDate?new Date(body.oldExpiryDate):new Date();',
+'    var newExp=new Date(ned);',
+'    var daysExt=Math.ceil((newExp-oldExp)/86400000);',
+'    var lH=txnSh.getRange(1,1,1,txnSh.getLastColumn()).getValues()[0].map(function(h){return h.toString().trim();});',
+'    ensureRenewalCols_(txnSh,lH);',
+'    var fH=txnSh.getRange(1,1,1,txnSh.getLastColumn()).getValues()[0].map(function(h){return h.toString().trim();});',
+'    var idx=buildColIndex(fH);',
+'    var newRow=new Array(fH.length).fill("");',
+'    function set(f,v){if(idx[f]>=0)newRow[idx[f]]=v;}',
+'    set("name",search.customerName);set("phone",phone);',
+'    set("email",search.email||cd.email||"");set("course",course);',
+'    set("courseId",cd.courseId||"");set("courseUrl",cd.courseUrl||"");',
+'    set("orgId",CLIENT.orgId);set("orgName",CLIENT.orgName);',
+'    set("transactionId",txnId);set("paymentId",txnId);',
+'    set("transDate",formatDate(now));set("amountPaid",finalAmt);',
+'    set("currentPrice",origAmt);set("couponDiscount",discAmt>0?discAmt:"");',
+'    set("discountPct",discAmt>0&&origAmt>0?Math.round((discAmt/origAmt)*100)+"%":"");',
+'    set("expiryDate",formatDate(newExp));set("isExpired","FALSE");set("state","active");',
+'    set("entryType",entryType.toUpperCase());',
+'    set("parentTxnId",body.parentTxnId||cd.transactionId||"");',
+'    set("processedBy",body.processedBy||CLIENT.orgId);',
+'    set("renewalNotes",body.notes||(body.couponCode?"Coupon: "+body.couponCode:""));',
+'    set("systemTimestamp",now.toISOString());',
+'    var ok=false;',
+'    try{txnSh.appendRow(newRow);ok=true;}catch(e){return{success:false,error:"Sheet write failed: "+e.message};}',
+'    try{',
+'      logSh.appendRow([logId,txnId,body.parentTxnId||cd.transactionId||"",phone,search.customerName,',
+'        course,entryType.toUpperCase(),formatDate(oldExp),formatDate(newExp),daysExt,finalAmt,',
+'        body.couponCode||"",discAmt||"",body.processedBy||CLIENT.orgId,now.toISOString()]);',
+'    }catch(e){',
+'      if(ok)try{txnSh.deleteRow(txnSh.getLastRow());}catch(_){}',
+'      return{success:false,error:"Log failed (rolled back): "+e.message};',
+'    }',
+'    if(body.couponCode&&body.couponRowIndex){',
+'      try{',
+'        var cs=SpreadsheetApp.openById(CLIENT.sheetId).getSheetByName(TABS.COUPONS);',
+'        var ch=cs.getRange(1,1,1,cs.getLastColumn()).getValues()[0];',
+'        var col=ch.indexOf("TimesUsed")+1;',
+'        if(col>0){var cell=cs.getRange(body.couponRowIndex,col);cell.setValue((parseInt(cell.getValue())||0)+1);}',
+'      }catch(_){}',
+'    }',
+'    return {success:true,transactionId:txnId,logId:logId,',
+'      customerName:search.customerName,course:course,',
+'      entryType:entryType.toUpperCase(),newExpiryDate:formatDate(newExp),',
+'      oldExpiryDate:formatDate(oldExp),daysExtended:daysExt,',
+'      amountPaid:finalAmt,originalAmount:origAmt,discountApplied:discAmt,',
+'      couponCode:body.couponCode||null,',
+'      message:entryType+" done. New expiry: "+formatDate(newExp)};',
+"  } catch(e){logError('processRenewal',e.message,'');return {success:false,error:e.message};}",
+'}',
+'',
+'// ============================================================',
+'//  DASHBOARD + HISTORY',
+'// ============================================================',
+'function getDashboardStats() {',
+'  try {',
+'    var sh=getTxnSheet();var data=sh.getDataRange().getValues();',
+'    var h=data[0].map(function(x){return x.toString().trim();});',
+'    var idx=buildColIndex(h);',
+'    var rows=data.slice(1).filter(function(r){return r.some(function(c){return c!=="";});});',
+'    var today=new Date(),in15=new Date();in15.setDate(in15.getDate()+15);',
+'    var rev=0,exp=0,exp15=0,ren=0,ext=0;',
+'    rows.forEach(function(r){',
+'      rev+=parseFloat(getVal(r,idx,"amountPaid"))||0;',
+'      var ed=parseSheetDate(getVal(r,idx,"expiryDate")||r[CLIENT.colIdx.expiryDate]);',
+'      if(!isNaN(ed)&&ed.getFullYear()>1971){',
+'        if(ed<today)exp++;',
+'        else if(ed<=in15)exp15++;',
+'      }',
+'      var et=getVal(r,idx,"entryType").toString().toUpperCase();',
+'      if(et==="RENEWAL")ren++;if(et==="EXTENSION")ext++;',
+'    });',
+'    var logs=0;try{logs=Math.max(0,getSystemSheet(TABS.LOGS).getLastRow()-1);}catch(_){}',
+'    return {success:true,stats:{totalTransactions:rows.length,totalRevenue:Math.round(rev),',
+'      renewals:ren,extensions:ext,expired:exp,expiringIn15:exp15,totalLogs:logs}};',
+"  } catch(e){return {success:false,error:e.message};}",
+'}',
+'function getRenewalHistory(phone) {',
+'  try {',
+'    phone=phone.toString().replace(/\\D/g,"").slice(-10);',
+'    var sh;try{sh=getSystemSheet(TABS.LOGS);}catch(_){return{success:true,history:[]};}',
+'    var data=sh.getDataRange().getValues();var h=data[0];',
+'    var pi=h.indexOf("CustomerPhone");',
+'    var rows=data.slice(1)',
+'      .filter(function(r){return r[pi]&&r[pi].toString().replace(/\\D/g,"").slice(-10)===phone;})',
+'      .map(function(r){var o={};h.forEach(function(k,i){o[k]=r[i];});return o;})',
+'      .reverse();',
+'    return {success:true,history:rows};',
+"  } catch(e){return {success:false,error:e.message};}",
+'}',
+'',
+'// ============================================================',
+'//  SETUP',
+'// ============================================================',
+'function setupSheets() {',
+'  try {',
+'    var ss=SpreadsheetApp.openById(CLIENT.sheetId);',
+'    var tabDefs={};',
+'    tabDefs[TABS.TXN]=Object.values(CLIENT.col);',
+"    tabDefs[TABS.LOGS]=['LogID','NewTxnID','ParentTxnID','CustomerPhone','CustomerName','Course','RenewalType','OldExpiryDate','NewExpiryDate','DaysExtended','AmountPaid','CouponUsed','DiscountGiven','ProcessedBy','Timestamp'];",
+"    tabDefs[TABS.COUPONS]=['CouponCode','DiscountType','DiscountValue','MinOrderAmount','MaxDiscount','ApplicableCourses','ApplicableFor','ValidFrom','ValidTo','UsageLimitTotal','UsageLimitPerUser','TimesUsed','IsActive','CreatedBy','Notes'];",
+"    tabDefs[TABS.ERRORS]=['Timestamp','Function','ErrorMessage','Payload'];",
+"    tabDefs[TABS.PINS]=['Phone','Name','PIN','CreatedAt','LastLogin','SessionToken','SessionExpiry'];",
+'    var created=[];',
+'    Object.entries(tabDefs).forEach(function(e){',
+'      if(!ss.getSheetByName(e[0])){',
+'        var s=ss.insertSheet(e[0]);s.appendRow(e[1]);',
+"        s.getRange(1,1,1,e[1].length).setBackground('#1a1a2e').setFontColor('#fff').setFontWeight('bold');",
+'        created.push(e[0]);',
+'      }',
+'    });',
+'    var cs=ss.getSheetByName(TABS.COUPONS);',
+'    if(cs.getLastRow()<=1){',
+"      var vF=Utilities.formatDate(new Date(),Session.getScriptTimeZone(),'yyyy-MM-dd');",
+'      var nxt=new Date();nxt.setFullYear(nxt.getFullYear()+1);',
+"      var vT=Utilities.formatDate(nxt,Session.getScriptTimeZone(),'yyyy-MM-dd');",
+"      cs.appendRow(['TEST10','PERCENT',10,0,500,'ALL','ALL',vF,vT,9999,99,0,true,CLIENT.orgId,'10% test']);",
+"      cs.appendRow(['TEST20','PERCENT',20,0,1500,'ALL','ALL',vF,vT,9999,99,0,true,CLIENT.orgId,'20% test']);",
+"      cs.appendRow(['FLAT500','FLAT',500,1000,500,'ALL','ALL',vF,vT,9999,99,0,true,CLIENT.orgId,'Rs500 flat test']);",
+'    }',
+'    var fetchMsg="";',
+'    try{syncTransactionsHourly();fetchMsg="Initial sync: OK.";}',
+'    catch(e){fetchMsg="Initial sync failed: "+e.message;}',
+'    registerHourlyTrigger_();',
+'    return {success:true,message:"Tabs: "+(created.length?created.join(", "):"all exist")+"\\n"+fetchMsg+"\\nHourly trigger registered.\\nTest coupons: TEST10, TEST20, FLAT500"};',
+"  } catch(e){logError('setupSheets',e.message,'');return {success:false,error:e.message};}",
+'}',
+'',
+'// ============================================================',
+'//  UTILITIES',
+'// ============================================================',
+'function ensureRenewalCols_(sh,existing) {',
+'  var needed=[CLIENT.col.entryType,CLIENT.col.parentTxnId,CLIENT.col.processedBy,CLIENT.col.renewalNotes,CLIENT.col.systemTimestamp];',
+'  var col=existing.length+1;',
+'  needed.forEach(function(name){',
+'    if(!existing.includes(name)){',
+"      sh.getRange(1,col).setValue(name).setBackground('#1a1a2e').setFontColor('#fff').setFontWeight('bold');",
+'      existing.push(name);col++;',
+'    }',
+'  });',
+'}',
+'function generateId(prefix) {',
+"  var d=Utilities.formatDate(new Date(),Session.getScriptTimeZone(),'yyyyMMdd');",
+'  return prefix+"-"+d+"-"+(Math.floor(Math.random()*9000)+1000);',
+'}',
+'function parseSheetDate(d) {',
+'  if(d===null||d===undefined||d==="") return new Date(NaN);',
+'  if(d instanceof Date) return d;',
+'  if(typeof d==="number") return new Date((d-25569)*86400*1000);',
+'  return new Date(d);',
+'}',
+'function formatDate(d) {',
+'  if(!d&&d!==0) return "";',
+'  var dt=d instanceof Date?d:(typeof d==="number"?new Date((d-25569)*86400*1000):new Date(d));',
+'  if(isNaN(dt)||dt.getFullYear()<1971) return "";',
+"  return Utilities.formatDate(dt,Session.getScriptTimeZone(),'yyyy-MM-dd');",
+'}',
+'function logError(fn,msg,payload) {',
+'  try {',
+'    var sh=SpreadsheetApp.openById(CLIENT.sheetId).getSheetByName(TABS.ERRORS);',
+'    if(sh) sh.appendRow([new Date().toISOString(),fn,msg,(payload||"").toString().slice(0,500)]);',
+'  } catch(_) {}',
+'}'
+  ].join('\n');
+
+  // ── Shell.html template ──────────────────────────────────────
+  var shell=[
+'<!DOCTYPE html>',
+'<html>',
+'<head>',
+'  <base target="_top">',
+'  <meta charset="UTF-8">',
+'  <meta name="viewport" content="width=device-width,initial-scale=1">',
+'  <style>',
+'    body{margin:0;background:#08090d}',
+'    #_er_loader{position:fixed;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;background:#08090d;color:#7a7e9a;font-family:sans-serif;font-size:14px;gap:16px}',
+'    #_er_loader svg{animation:_sp 1s linear infinite}',
+'    @keyframes _sp{to{transform:rotate(360deg)}}',
+'    #_er_err{display:none;color:#ef4444;font-size:13px;max-width:400px;text-align:center;line-height:1.6}',
+'  </style>',
+'</head>',
+'<body>',
+'<div id="_er_loader">',
+'  <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#5b6cf5" stroke-width="2">',
+'    <circle cx="12" cy="12" r="10" stroke-opacity=".2"/>',
+'    <path d="M12 2a10 10 0 0 1 10 10"/>',
+'  </svg>',
+'  <span>Loading portal...</span>',
+'  <div id="_er_err"></div>',
+'</div>',
+'<script>',
+'  var _PAGE = "<?= page ?>";',
+'  var _URL  = _PAGE === "student" ? "'+CENTRAL_STUDENT_URL+'" : "'+CENTRAL_ADMIN_URL+'";',
+'  fetch(_URL)',
+'    .then(function(r){ if(!r.ok) throw new Error("HTTP "+r.status); return r.text(); })',
+'    .then(function(h){ document.open(); document.write(h); document.close(); })',
+'    .catch(function(err){',
+'      document.querySelector("#_er_loader svg").style.display="none";',
+'      var el=document.getElementById("_er_err");',
+'      el.style.display="block";',
+'      el.textContent="Failed to load portal: "+err.message;',
+'    });',
+'<\\/script>',
+'</body>',
+'</html>'
+  ].join('\n');
+
+  window._genData={orgId:orgId,orgName:orgName,sheetId:sheetId,queryId:queryId,color:color};
+  var existingUrl=document.getElementById('webAppUrl').value.trim();
+  if(existingUrl) onWebAppUrlInput(existingUrl);
+
+  setTimeout(function(){
+    document.getElementById('codeOut').textContent=code;
+    document.getElementById('shellOut').textContent=shell;
+    document.getElementById('output').style.display='block';
+    btn.disabled=false;
+    btn.textContent='▷ Generate Code.gs';
+    document.getElementById('output').scrollIntoView({behavior:'smooth',block:'start'});
+  },300);
+}
+
+// ── Copy buttons ─────────────────────────────────────────────
+function copyCode(){
+  navigator.clipboard.writeText(document.getElementById('codeOut').textContent).then(function(){
+    var btn=document.getElementById('copyBtn');
+    btn.textContent='Copied!';btn.className='copy-btn copied';
+    setTimeout(function(){btn.textContent='Copy all';btn.className='copy-btn';},2500);
+  });
+}
+function copyShell(){
+  navigator.clipboard.writeText(document.getElementById('shellOut').textContent).then(function(){
+    var btn=document.getElementById('copyShellBtn');
+    btn.textContent='Copied!';btn.className='copy-btn copied';
+    setTimeout(function(){btn.textContent='Copy';btn.className='copy-btn';},2500);
+  });
+}
+
+// ── Tab switching ────────────────────────────────────────────
+function switchTab(name){
+  document.querySelectorAll('.tab-pane').forEach(function(p){p.classList.remove('active');});
+  document.querySelectorAll('.tab-btn').forEach(function(b){b.classList.remove('active');});
+  document.getElementById('tab-'+name).classList.add('active');
+  document.querySelectorAll('.tab-btn')[name==='generate'?0:1].classList.add('active');
+  if(name==='log') renderLogTable();
+}
+
+// ── Phase 3: Web App URL ─────────────────────────────────────
+function onWebAppUrlInput(val){
+  val=val.trim();
+  var preview=document.getElementById('urlPreviewCard');
+  var saveBtn=document.getElementById('saveClientBtn');
+  var copyBtn=document.getElementById('copyBothBtn');
+  if(!val||val.indexOf('script.google.com')<0){
+    preview.style.display='none';saveBtn.style.display='none';copyBtn.style.display='none';return;
+  }
+  var base=val.replace(/[?#].*/,'').replace(/\/+$/,'');
+  document.getElementById('adminUrlPreview').textContent=base+'/exec';
+  document.getElementById('studentUrlPreview').textContent=base+'/exec?page=student';
+  preview.style.display='block';saveBtn.style.display='flex';copyBtn.style.display='flex';
+}
+function copyUrl(id){
+  navigator.clipboard.writeText(document.getElementById(id).textContent).then(function(){
+    setMasterStatus('ok','Copied!');
+  });
+}
+function copyBothUrls(){
+  var a=document.getElementById('adminUrlPreview').textContent;
+  var s=document.getElementById('studentUrlPreview').textContent;
+  if(!a){setMasterStatus('err','Paste the Web App URL first');return;}
+  navigator.clipboard.writeText('Admin: '+a+'\nStudent: '+s).then(function(){
+    setMasterStatus('ok','Both links copied!');
+  });
+}
+
+// ── Save client ──────────────────────────────────────────────
+function saveClient(){
+  var webAppUrl=document.getElementById('webAppUrl').value.trim();
+  if(!webAppUrl){setMasterStatus('err','Paste the Web App URL first');return;}
+  if(!window._genData){setMasterStatus('err','Generate a Code.gs first (Phase 1)');return;}
+  var d=window._genData;
+  var base=webAppUrl.replace(/[?#].*/,'').replace(/\/+$/,'');
+  var adminUrl=base+'/exec';
+  var studentUrl=base+'/exec?page=student';
+  var date=new Date().toISOString().slice(0,10);
+  if(!MASTER_LOGGER_URL){setMasterStatus('err','MASTER_LOGGER_URL not set');return;}
+  setMasterStatus('loading','<div class="spin-sm"></div>&nbsp;Saving to master sheet...');
+  document.getElementById('saveClientBtn').disabled=true;
+  var payload={date:date,orgId:d.orgId,orgName:d.orgName,sheetId:d.sheetId,queryId:d.queryId,color:d.color,adminUrl:adminUrl,studentUrl:studentUrl,notes:''};
+  addToLocalLog(payload);
+  fetch(MASTER_LOGGER_URL,{method:'POST',mode:'no-cors',headers:{'Content-Type':'text/plain'},body:JSON.stringify(payload)})
+  .then(function(){
+    document.getElementById('saveClientBtn').disabled=false;
+    setMasterStatus('ok','✓ Saved! Switch to <strong>Client Log</strong> tab to view all clients.');
+  })
+  .catch(function(e){
+    document.getElementById('saveClientBtn').disabled=false;
+    setMasterStatus('err','Save failed ('+e.message+') - saved locally only.');
+  });
+}
+function setMasterStatus(t,h){
+  var el=document.getElementById('masterStatus');
+  var s={ok:'background:rgba(34,197,94,.07);border:1px solid rgba(34,197,94,.2);color:var(--green)',
+         err:'background:rgba(239,68,68,.07);border:1px solid rgba(239,68,68,.2);color:var(--red)',
+         loading:'background:rgba(91,108,245,.07);border:1px solid rgba(91,108,245,.2);color:var(--accent2)'};
+  el.style.cssText=s[t]+';padding:9px 13px;border-radius:var(--r-sm);font-size:12px;display:flex;align-items:center;gap:7px;font-family:var(--mono);margin-bottom:10px';
+  el.innerHTML=h;
+}
+
+// ── Local log ────────────────────────────────────────────────
+function getLocalLog(){try{return JSON.parse(localStorage.getItem('er_client_log')||'[]');}catch(_){return[];}}
+function saveLocalLog(arr){localStorage.setItem('er_client_log',JSON.stringify(arr.slice(0,100)));}
+function addToLocalLog(entry){
+  var log=getLocalLog();
+  var key=entry.orgId+'|'+entry.adminUrl;
+  log=log.filter(function(r){return(r.orgId+'|'+r.adminUrl)!==key;});
+  log.unshift(entry);saveLocalLog(log);
+}
+
+// ── Client log tab ───────────────────────────────────────────
+var _sheetData=null;
+function renderLogTable(){
+  var rows=_sheetData||getLocalLog();
+  var body=document.getElementById('logTableBody');
+  var empty=document.getElementById('logEmpty');
+  var count=document.getElementById('logRowCount');
+  if(!rows.length){body.innerHTML='';if(empty)empty.style.display='block';count.textContent='';return;}
+  if(empty)empty.style.display='none';
+  count.textContent=rows.length+' client'+(rows.length!==1?'s':'');
+  body.innerHTML=rows.map(function(c){
+    return '<tr>'
+      +'<td style="color:var(--text3);white-space:nowrap">'+esc(c.date||'')+'</td>'
+      +'<td style="font-weight:600;color:var(--text)">'+esc(c.orgName||'')+'</td>'
+      +'<td style="font-family:var(--mono);font-size:11px;color:var(--accent2)">'+esc(c.orgId||'')+'</td>'
+      +'<td style="font-family:var(--mono);font-size:10px;color:var(--text3)" title="'+esc(c.sheetId||'')+'">'+esc((c.sheetId||'').slice(0,14)+((c.sheetId||'').length>14?'...':''))+'</td>'
+      +'<td style="font-family:var(--mono);font-size:11px">'+esc(c.queryId||'')+'</td>'
+      +'<td>'+(c.adminUrl?'<a href="'+esc(c.adminUrl)+'" target="_blank" style="font-family:var(--mono);font-size:11px;color:var(--accent2);text-decoration:none">Admin ↗</a>':'-')+'</td>'
+      +'<td>'+(c.studentUrl?'<a href="'+esc(c.studentUrl)+'" target="_blank" style="font-family:var(--mono);font-size:11px;color:var(--accent2);text-decoration:none">Student ↗</a>':'-')+'</td>'
+      +'<td style="color:var(--text3);font-size:11px">'+esc(c.notes||'')+'</td>'
+      +'</tr>';
+  }).join('');
+}
+function pullFromSheet(){
+  setLogStatus('loading','<div class="spin-sm"></div>&nbsp;Fetching from master sheet...');
+  document.getElementById('pullBtn').disabled=true;
+  if(!MASTER_LOGGER_URL){setLogStatus('err','MASTER_LOGGER_URL not set');return;}
+  fetch(MASTER_LOGGER_URL,{method:'GET',mode:'cors'})
+  .then(function(r){return r.json();})
+  .then(function(data){
+    document.getElementById('pullBtn').disabled=false;
+    if(!data.success) throw new Error(data.error||'Unknown error');
+    var rows=data.rows||[];
+    _sheetData=rows.map(function(r){
+      return {date:r['Date']||'',orgId:r['OrgID']||'',orgName:r['OrgName']||'',sheetId:r['SheetID']||'',queryId:r['QueryID']||'',color:r['Color']||'',adminUrl:r['AdminURL']||'',studentUrl:r['StudentURL']||'',notes:r['Notes']||''};
+    });
+    _sheetData.forEach(function(e){addToLocalLog(e);});
+    renderLogTable();
+    setLogStatus('ok','✓ Loaded '+_sheetData.length+' client'+(_sheetData.length!==1?'s':'')+' from master sheet.');
+  })
+  .catch(function(e){
+    document.getElementById('pullBtn').disabled=false;
+    setLogStatus('err','Pull failed: '+e.message);
+  });
+}
+function setLogStatus(t,h){var el=document.getElementById('logStatus');el.className='log-status '+t;el.innerHTML=h;el.style.display='flex';}
+function clearLocalLog(){if(!confirm('Clear local cache? Master sheet is not affected.'))return;localStorage.removeItem('er_client_log');_sheetData=null;renderLogTable();}
+function esc(s){var d=document.createElement('div');d.textContent=s;return d.innerHTML;}
+(function init(){renderLogTable();})();
+</script>
+</body>
+</html>
