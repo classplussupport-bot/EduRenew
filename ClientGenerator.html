@@ -1283,15 +1283,17 @@ function saveClient(){
   addToLocalLog(payload);
   // Use no-cors — response is opaque but POST goes through
   // Save locally immediately and assume master sheet save succeeded
-  fetch(MASTER_LOGGER_URL,{method:'POST',mode:'no-cors',headers:{'Content-Type':'text/plain'},body:JSON.stringify(payload)})
+  // Use URLSearchParams — works with no-cors unlike JSON body
+  var formData = new URLSearchParams();
+  formData.append('data', JSON.stringify(payload));
+  fetch(MASTER_LOGGER_URL,{method:'POST',mode:'no-cors',body:formData})
   .then(function(){
     document.getElementById('saveClientBtn').disabled=false;
     setMasterStatus('ok','✓ Saved to master sheet and local log! Check <strong>Client Log</strong> tab.');
   })
   .catch(function(e){
     document.getElementById('saveClientBtn').disabled=false;
-    // Even if fetch fails, we already saved locally
-    setMasterStatus('ok','✓ Saved locally. Master sheet sync may have failed — check Client Log tab to verify.');
+    setMasterStatus('err','Save failed: '+e.message+'. Data saved locally only.');
   });
 }
 function setMasterStatus(t,h){
