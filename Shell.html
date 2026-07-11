@@ -24,8 +24,8 @@
 <script>
   var _PAGE = "<?= page ?>";
   var _URL  = _PAGE === "student"
-    ? "https://raw.githubusercontent.com/classplussupport-bot/EduRenew/main/Student_Demo.html"
-    : "https://raw.githubusercontent.com/classplussupport-bot/EduRenew/main/Index.html";
+    ? "https://classplussupport-bot.github.io/EduRenew/Student_Demo.html"
+    : "https://classplussupport-bot.github.io/EduRenew/Index.html";
   fetch(_URL)
     .then(function(r){ if(!r.ok) throw new Error("HTTP "+r.status); return r.text(); })
     .then(function(h){ document.open(); document.write(h); document.close(); })
