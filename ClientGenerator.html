@@ -473,26 +473,23 @@ function saveClient() {
     sheetId:_genData.sheetId,queryId:_genData.queryId,color:_genData.color,
     adminUrl:adminUrl,studentUrl:studentUrl,notes:''
   };
-  // Always save locally first (instant)
+  // Save locally first (instant, always works)
   addLocal(payload);
-  // Save to master sheet via GET params
-  var params=Object.keys(payload).map(function(k){return encodeURIComponent(k)+'='+encodeURIComponent(payload[k]||'');}).join('&');
-  fetch(MASTER_URL+'?'+params,{method:'GET',mode:'cors'})
-    .then(function(r){return r.json();})
-    .then(function(data){
-      setBtn('saveBtn','saveSpin','saveLabel',false,'Save to Master Sheet');
-      if(data.success){
-        showStatus('saveStatus','ok','&#10003; <strong>'+esc(_genData.orgName)+'</strong> saved to master sheet successfully! Check the <strong>All Clients</strong> tab to verify.');
-        // Auto-refresh clients tab data
-        _allClients=[];
-      }else{
-        showStatus('saveStatus','err','Master sheet error: '+(data.error||'Unknown')+'<br><small>Client is saved locally — check All Clients tab.</small>');
-      }
-    })
-    .catch(function(err){
-      setBtn('saveBtn','saveSpin','saveLabel',false,'Save to Master Sheet');
-      showStatus('saveStatus','ok','&#10003; Saved locally. Master sheet may take a moment to sync.<br><small>Check the All Clients tab to verify.</small>');
-    });
+
+  // Save to master sheet via POST form data (no-cors safe)
+  var formData = new FormData();
+  Object.keys(payload).forEach(function(k){ formData.append(k, payload[k]||''); });
+  fetch(MASTER_URL, {method:'POST', mode:'no-cors', body: formData})
+    .catch(function(){}); // fire and forget
+
+  // Show success immediately after local save
+  setTimeout(function(){
+    setBtn('saveBtn','saveSpin','saveLabel',false,'Save to Master Sheet');
+    showStatus('saveStatus','ok',
+      '&#10003; <strong>'+esc(_genData.orgName)+'</strong> registered! '+
+      'Go to <strong>All Clients</strong> tab to verify master sheet sync.');
+    _allClients=[];
+  }, 800);
 }
 
 // ── Copy helpers ──────────────────────────────────────────────
@@ -680,7 +677,7 @@ function fetchAll_() {
   return parseCsv_(r.getContentText());
 }
 function parseCsv_(csv) {
-  var lines = csv.split('\\n').map(function(l){return l.replace(/\\r/g,'');}).filter(Boolean);
+  var lines = csv.split('\n').map(function(l){return l.replace(/\\r/g,'');}).filter(Boolean);
   if (lines.length<2) return [];
   var h = splitRow_(lines[0]);
   return lines.slice(1).map(function(l){
@@ -774,17 +771,17 @@ function getVal_(row,idx,field) {
 // ============================================================
 function checkRegistration(phone) {
   try {
-    phone=phone.toString().replace(/\\D/g,'').slice(-10);
+    phone=phone.toString().replace(/\D/g,'').slice(-10);
     var sh=getTxnSheet_(),data=sh.getDataRange().getValues();
     var h=data[0].map(function(x){return x.toString().trim();});
     var idx=buildIdx_(h);
     var found=false,cName='';
     data.slice(1).forEach(function(r){
-      if((r[idx.phone]||'').toString().replace(/\\D/g,'').slice(-10)===phone){found=true;cName=cName||(r[idx.name]||'').toString().trim();}
+      if((r[idx.phone]||'').toString().replace(/\D/g,'').slice(-10)===phone){found=true;cName=cName||(r[idx.name]||'').toString().trim();}
     });
     var ps=ensurePins_(),pd=ps.getDataRange().getValues(),hasPin=false,pName='';
     pd.slice(1).forEach(function(r){
-      if((r[0]||'').toString().replace(/\\D/g,'').slice(-10)===phone){hasPin=!!(r[2]&&r[2].toString().trim());pName=(r[1]||'').toString().trim();}
+      if((r[0]||'').toString().replace(/\D/g,'').slice(-10)===phone){hasPin=!!(r[2]&&r[2].toString().trim());pName=(r[1]||'').toString().trim();}
     });
     return{success:true,found:found,hasPin:hasPin,customerName:pName||cName,phone:phone};
   }catch(e){return{success:false,error:e.message};}
@@ -795,9 +792,9 @@ function resetPin(phone,name,pin) {
   try {
     var sh=getTxnSheet_(),data=sh.getDataRange().getValues();
     var h=data[0].map(function(x){return x.toString().trim();}),idx=buildIdx_(h);
-    var p10=phone.toString().replace(/\\D/g,'').slice(-10),ok=false;
+    var p10=phone.toString().replace(/\D/g,'').slice(-10),ok=false;
     data.slice(1).forEach(function(r){
-      var rp=(r[idx.phone]||'').toString().replace(/\\D/g,'').slice(-10);
+      var rp=(r[idx.phone]||'').toString().replace(/\D/g,'').slice(-10);
       var rn=(r[idx.name]||'').toString().trim().toLowerCase();
       if(rp===p10&&rn===name.trim().toLowerCase())ok=true;
     });
@@ -808,15 +805,15 @@ function resetPin(phone,name,pin) {
 function savePin_(phone,name,pin) {
   try {
     if(!phone||!pin)return{success:false,error:'Phone and PIN required'};
-    phone=phone.toString().replace(/\\D/g,'').slice(-10);
+    phone=phone.toString().replace(/\D/g,'').slice(-10);
     pin=pin.toString().trim();name=(name||'').toString().trim();
-    if(!/^\\d{4}$/.test(pin))return{success:false,error:'PIN must be 4 digits'};
+    if(!/^\d{4}$/.test(pin))return{success:false,error:'PIN must be 4 digits'};
     var sh=ensurePins_(),data=sh.getDataRange().getValues();
     var now=new Date().toISOString();
     var tok=Utilities.getUuid().replace(/-/g,'')+Utilities.getUuid().replace(/-/g,'');
     var exp=new Date(new Date().getTime()+7*24*3600*1000).toISOString();
     for(var i=1;i<data.length;i++){
-      if((data[i][0]||'').toString().replace(/\\D/g,'').slice(-10)===phone){
+      if((data[i][0]||'').toString().replace(/\D/g,'').slice(-10)===phone){
         var n=name||data[i][1]||'';
         sh.getRange(i+1,1,1,7).setValues([[phone,n,pin,data[i][3]||now,now,tok,exp]]);
         return{success:true,customerName:n,phone:phone,token:tok};
@@ -829,11 +826,11 @@ function savePin_(phone,name,pin) {
 function verifyPin_(phone,pin) {
   try {
     if(!phone||!pin)return{success:false,error:'Phone and PIN required'};
-    phone=phone.toString().replace(/\\D/g,'').slice(-10);
+    phone=phone.toString().replace(/\D/g,'').slice(-10);
     pin=pin.toString().trim();
     var sh=ensurePins_(),data=sh.getDataRange().getValues(),now=new Date().toISOString();
     for(var i=1;i<data.length;i++){
-      if((data[i][0]||'').toString().replace(/\\D/g,'').slice(-10)===phone){
+      if((data[i][0]||'').toString().replace(/\D/g,'').slice(-10)===phone){
         if(data[i][2].toString()!==pin)return{success:false,error:'Incorrect PIN. Try again.'};
         var tok=Utilities.getUuid().replace(/-/g,'')+Utilities.getUuid().replace(/-/g,'');
         var exp=new Date(new Date().getTime()+7*24*3600*1000).toISOString();
@@ -847,10 +844,10 @@ function verifyPin_(phone,pin) {
 function validateSession(phone,token) {
   try {
     if(!phone||!token)return{success:false,error:'Missing'};
-    phone=phone.toString().replace(/\\D/g,'').slice(-10);
+    phone=phone.toString().replace(/\D/g,'').slice(-10);
     var sh=ensurePins_(),data=sh.getDataRange().getValues(),now=new Date();
     for(var i=1;i<data.length;i++){
-      if((data[i][0]||'').toString().replace(/\\D/g,'').slice(-10)===phone){
+      if((data[i][0]||'').toString().replace(/\D/g,'').slice(-10)===phone){
         var st=data[i][5]?data[i][5].toString():'';
         var se=data[i][6]?new Date(data[i][6]):null;
         if(st!==token)return{success:false,error:'Invalid session'};
@@ -888,11 +885,11 @@ function studentLookup(phone,token) {
 function searchUser(phone){return searchUser_(phone);}
 function searchUser_(phone) {
   try {
-    phone=phone.toString().replace(/\\D/g,'').slice(-10);
+    phone=phone.toString().replace(/\D/g,'').slice(-10);
     var sh=getTxnSheet_(),data=sh.getDataRange().getValues();
     var h=data[0].map(function(x){return x.toString().trim();}),idx=buildIdx_(h);
     var rows=data.slice(1).filter(function(r){
-      return(r[idx.phone]||'').toString().replace(/\\D/g,'').slice(-10)===phone;
+      return(r[idx.phone]||'').toString().replace(/\D/g,'').slice(-10)===phone;
     });
     if(!rows.length)return{success:false,error:'No records found'};
     var cm={};
@@ -953,7 +950,7 @@ function getActiveMonthlyCoupon() {
 }
 function setMonthlyCoupon(payload) {
   try {
-    var code=(payload.code||'').toString().trim().toUpperCase().replace(/[^A-Z0-9\\-]/g,'');
+    var code=(payload.code||'').toString().trim().toUpperCase().replace(/[^A-Z0-9-]/g,'');
     var dtype=(payload.discountType||'PERCENT').toUpperCase();
     var dval=parseFloat(payload.discountValue)||0;
     var cap=parseFloat(payload.maxDiscount)||999999;
@@ -994,7 +991,7 @@ function getMonthlyCoupons() {
 // ============================================================
 function getPaymentRedirectUrl(phone,courseName) {
   try {
-    phone=phone.toString().replace(/\\D/g,'').slice(-10);
+    phone=phone.toString().replace(/\D/g,'').slice(-10);
     courseName=courseName.toString().trim();
     var sh=getTxnSheet_(),data=sh.getDataRange().getValues();
     var headers=data[0].map(function(h){return h.toString().trim();}),idx=buildIdx_(headers);
@@ -1002,7 +999,7 @@ function getPaymentRedirectUrl(phone,courseName) {
     if(urlColIdx<0)return{success:false,error:'Course_URL column not found'};
     var courseUrl='';
     var rows=data.slice(1).filter(function(r){
-      return(getVal_(r,idx,'phone')||'').toString().replace(/\\D/g,'').slice(-10)===phone&&
+      return(getVal_(r,idx,'phone')||'').toString().replace(/\D/g,'').slice(-10)===phone&&
              getVal_(r,idx,'course').toString().trim().toLowerCase()===courseName.toLowerCase();
     });
     for(var i=0;i<rows.length;i++){
@@ -1099,12 +1096,12 @@ function getDashboardStats() {
 }
 function getRenewalHistory(phone) {
   try {
-    phone=phone.toString().replace(/\\D/g,'').slice(-10);
+    phone=phone.toString().replace(/\D/g,'').slice(-10);
     var sh;try{sh=getSysSheet_(TABS.LOGS);}catch(_){return{success:true,history:[]};}
     var data=sh.getDataRange().getValues(),h=data[0];
     var pi=h.indexOf('CustomerPhone');
     var rows=data.slice(1)
-      .filter(function(r){return r[pi]&&r[pi].toString().replace(/\\D/g,'').slice(-10)===phone;})
+      .filter(function(r){return r[pi]&&r[pi].toString().replace(/\D/g,'').slice(-10)===phone;})
       .map(function(r){var o={};h.forEach(function(k,i){o[k]=r[i];});return o;})
       .reverse();
     return{success:true,history:rows};
@@ -1139,18 +1136,18 @@ function setupSheets() {
     try{syncTransactionsHourly();fetchMsg='Initial sync: OK.';}
     catch(e){fetchMsg='Initial sync failed: '+e.message;}
     registerTrigger_();
-    return{success:true,message:'Setup complete for '+CLIENT.orgName+'.\\n'+
-      'Tabs: '+(created.length?created.join(', '):'all existed')+'\\n'+fetchMsg+'\\nHourly trigger registered.'};
+    return{success:true,message:'Setup complete for '+CLIENT.orgName+'.\n'+
+      'Tabs: '+(created.length?created.join(', '):'all existed')+'\n'+fetchMsg+'\nHourly trigger registered.'};
   }catch(e){return{success:false,error:e.message};}
 }
 
 
 function logoutStudent(phone) {
   try {
-    phone=phone.toString().replace(/\\D/g,'').slice(-10);
+    phone=phone.toString().replace(/\D/g,'').slice(-10);
     var sh=ensurePins_(),data=sh.getDataRange().getValues();
     for(var i=1;i<data.length;i++){
-      if((data[i][0]||'').toString().replace(/\\D/g,'').slice(-10)===phone){
+      if((data[i][0]||'').toString().replace(/\D/g,'').slice(-10)===phone){
         sh.getRange(i+1,6).setValue('');sh.getRange(i+1,7).setValue('');
         return{success:true};
       }
