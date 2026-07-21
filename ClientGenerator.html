@@ -295,7 +295,8 @@ function generate() {
     .replace(/{{COLOR}}/g,    '#4f6ef7')
     .replace(/{{API_URL}}/g,  apiUrl)
     .replace(/{{DATE}}/g,     date);
-  _genData={orgName:orgName,orgId:orgId,orgCode:orgCode,appUrl:appUrl,sheetId:sheetId,queryId:queryId,date:date};
+  _genData={orgName:orgName,orgId:orgId,orgCode:orgCode,sheetId:sheetId,queryId:queryId,playStoreUrl:playStoreUrl,date:date};
+  saveMasterSheet(orgName, orgId, orgCode, sheetId, queryId, playStoreUrl, date);
   setBtn('genBtn','genSpin','genLabel',false,'&#9654; Generate Code.gs');
   showStatus('genStatus','ok','&#10003; Code.gs generated for <strong>'+esc(orgName)+'</strong>. Copy it, paste into Apps Script, deploy, then paste the URL below.');
   document.getElementById('codeOut').textContent=code;
@@ -339,6 +340,39 @@ function saveClient() {
     showStatus('saveStatus','ok','&#10003; <strong>'+esc(_genData.orgName)+'</strong> registered! Check <strong>All Clients</strong> tab to verify.');
     _allClients=[];
   },1000);
+}
+
+function saveMasterSheet(orgName, orgId, orgCode, sheetId, queryId, playStoreUrl, date) {
+  try {
+    var MASTER_ID = '1FVtnIz2d5KNfdmAtSeaL87eusT4Ep5Nj7b2vbsa2W6o';
+    var ss  = SpreadsheetApp.openById(MASTER_ID);
+    var sh  = ss.getSheetByName('Clients') || ss.getSheets()[0];
+    // Check if headers exist
+    var data = sh.getDataRange().getValues();
+    var headers = ['Date Added','Org Name','Org ID','Org Code','Sheet ID','Query ID','Play Store URL','Admin URL','Student URL','Status'];
+    if (data.length === 0 || data[0][0] !== 'Date Added') {
+      sh.insertRowBefore(1);
+      sh.getRange(1,1,1,headers.length).setValues([headers])
+        .setBackground('#1a1a2e').setFontColor('#fff').setFontWeight('bold');
+    }
+    // Check if this org already exists
+    var rows = sh.getDataRange().getValues();
+    for (var i=1;i<rows.length;i++) {
+      if (rows[i][2] && rows[i][2].toString() === orgId) {
+        // Update existing row
+        sh.getRange(i+1,1,1,headers.length).setValues([[
+          date, orgName, orgId, orgCode, sheetId, queryId, playStoreUrl,
+          '(deploy to get URL)', '(deploy to get URL)', 'Active'
+        ]]);
+        return;
+      }
+    }
+    // Append new row
+    sh.appendRow([date, orgName, orgId, orgCode, sheetId, queryId, playStoreUrl,
+      '(deploy to get URL)', '(deploy to get URL)', 'Active']);
+  } catch(e) {
+    console.error('Master sheet save failed:', e);
+  }
 }
 
 function copyManifest() {
