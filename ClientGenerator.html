@@ -236,29 +236,18 @@ tr:hover td{background:rgba(79,110,247,.03)}
 <!-- SETUP GUIDE -->
 <div class="tab-pane" id="tab-guide">
   <div class="card">
-    <div class="phase-header"><div class="phase-tag a">PHASE A</div><div class="phase-title">One-time Master Setup</div><div class="phase-sub">Do this once only</div></div>
+    <div class="phase-header"><div class="phase-tag b">CLIENT ONBOARDING</div><div class="phase-title">Register a New Client</div><div class="phase-sub">Follow these steps for every new client</div></div>
     <div class="card-body">
       <div class="steps">
-        <div class="step"><div class="step-num">1</div><div class="step-body"><strong>Open EduRenew Master Sheet</strong> &rarr; Extensions &rarr; Apps Script &rarr; delete all code &rarr; paste <code>MasterSheet.gs</code> &rarr; Save</div></div>
-        <div class="step"><div class="step-num">2</div><div class="step-body"><strong>Deploy as Web App</strong> &rarr; New deployment &rarr; gear &#9881; &rarr; Web App &rarr; Execute as: <strong>Me</strong> &rarr; Who has access: <strong>Anyone</strong> &rarr; Deploy &rarr; copy URL</div></div>
-        <div class="step"><div class="step-num">3</div><div class="step-body">Confirm the deployed URL matches the hardcoded URL in this generator:<br><code style="display:block;margin-top:6px;word-break:break-all;color:var(--accent2)">https://script.google.com/macros/s/AKfycbzXSquyOdwBt89jr3Hm3rkrh5qXybghQEDpcG_iizvbOsYC6G0M56tRQvqFKcOYSjC-Dw/exec</code></div></div>
-        <div class="step"><div class="step-num">4</div><div class="step-body"><strong>Golden rule:</strong> Never create a new deployment again. Always use <strong>Manage deployments &rarr; pencil &#9999; &rarr; New version &rarr; Deploy</strong> to keep the same URL.</div></div>
-      </div>
-    </div>
-  </div>
-  <div class="card">
-    <div class="phase-header"><div class="phase-tag b">PHASE B</div><div class="phase-title">Register Each New Client</div><div class="phase-sub">Repeat for every client</div></div>
-    <div class="card-body">
-      <div class="steps">
-        <div class="step"><div class="step-num">1</div><div class="step-body">Create a blank Google Sheet for the client &rarr; note the Sheet ID from the URL</div></div>
-        <div class="step"><div class="step-num">2</div><div class="step-body">Open <strong>Register Client</strong> tab &rarr; fill all 5 fields &rarr; click <strong>Generate Code.gs</strong> &rarr; click <strong>Copy all</strong></div></div>
-        <div class="step"><div class="step-num">3</div><div class="step-body">Open client's blank Google Sheet &rarr; Extensions &rarr; Apps Script &rarr; paste Code.gs &rarr; Save</div></div>
-        <div class="step"><div class="step-num">4</div><div class="step-body">Deploy &rarr; <strong>New deployment</strong> &rarr; Web App &rarr; Execute as: Me &rarr; Anyone &rarr; Deploy &rarr; copy URL</div></div>
-        <div class="step"><div class="step-num">5</div><div class="step-body">Back in generator &rarr; paste Web App URL &rarr; click <strong>Save to Master Sheet</strong></div></div>
-        <div class="step"><div class="step-num">6</div><div class="step-body">In Apps Script &rarr; select <code>setupSheets</code> &rarr; Run &rarr; grant permissions &rarr; done!</div></div>
-        <div class="step"><div class="step-num">7</div><div class="step-body">Share with client:<br>
-          <strong>Tutor URL:</strong> <code>/exec</code><br>
-          <strong>Student URL:</strong> <code>/exec?page=student</code></div></div>
+        <div class="step"><div class="step-num">1</div><div class="step-body"><strong>Create a blank Google Sheet</strong> for the client &rarr; copy the Sheet ID from the URL (long string between <code>/d/</code> and <code>/edit</code>)</div></div>
+        <div class="step"><div class="step-num">2</div><div class="step-body">Open <strong>Register Client</strong> tab &rarr; fill all 7 fields &rarr; click <strong>Generate Code.gs</strong> &rarr; click <strong>Copy all</strong></div></div>
+        <div class="step"><div class="step-num">3</div><div class="step-body">Open the client's Google Sheet &rarr; <strong>Extensions &rarr; Apps Script</strong> &rarr; select all existing code &rarr; delete &rarr; paste the copied Code.gs &rarr; <strong>Ctrl+S</strong></div></div>
+        <div class="step"><div class="step-num">4</div><div class="step-body">In Apps Script &rarr; click <strong>Project Settings</strong> (⚙️ gear icon) &rarr; tick <strong>"Show appsscript.json manifest file"</strong> &rarr; click <code>appsscript.json</code> &rarr; paste the <code>appsscript.json</code> from below &rarr; <strong>Ctrl+S</strong></div></div>
+        <div class="step"><div class="step-num">5</div><div class="step-body"><strong>Deploy</strong> &rarr; <strong>New deployment</strong> &rarr; click gear ⚙️ &rarr; <strong>Web App</strong> &rarr; Execute as: <strong>Me</strong> &rarr; Who has access: <strong>Anyone</strong> &rarr; <strong>Deploy</strong> &rarr; copy the Web App URL<br><span style="color:var(--amber);font-size:11px;margin-top:4px;display:block">⚠️ For all future updates: Manage deployments &rarr; pencil ✏️ &rarr; New version &rarr; Deploy. Never create a new deployment.</span></div></div>
+        <div class="step"><div class="step-num">6</div><div class="step-body">In Apps Script editor &rarr; select <code>setupSheets</code> from the function dropdown &rarr; click <strong>Run</strong> &rarr; grant permissions when prompted<br><span style="color:var(--text3);font-size:11px;margin-top:4px;display:block">This creates all required tabs and starts hourly auto-sync from Classplus.</span></div></div>
+        <div class="step"><div class="step-num">7</div><div class="step-body"><strong>Share with client:</strong><br>
+          📊 <strong>Tutor Dashboard:</strong> <code style="color:var(--accent2)">/exec</code><br>
+          🎓 <strong>Student Portal:</strong> <code style="color:var(--green)">/exec?page=student</code></div></div>
       </div>
     </div>
   </div>
