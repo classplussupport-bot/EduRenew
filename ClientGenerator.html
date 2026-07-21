@@ -268,7 +268,7 @@ function switchTab(n) {
 
 function generate() {
   var orgName=v('f_name'),orgId=v('f_orgId'),sheetId=v('f_sheet'),queryId=v('f_query'),apiKey=v('f_key');
-  var orgCode=v('f_orgCode'),apiKey=v('f_key');
+  var orgCode=v('f_orgCode'),apiKey=v('f_key'),playStoreUrl=v('f_playStore');
   if (!orgName||!orgId||!orgCode||!playStoreUrl||!sheetId||!queryId||!apiKey) { showStatus('genStatus','err','Please fill in all required fields.'); return; }
   setBtn('genBtn','genSpin','genLabel',true,'Generating...');
   var apiUrl='http://data.classplus.co/api/queries/'+encodeURIComponent(queryId)+'/results.csv?api_key='+encodeURIComponent(apiKey);
