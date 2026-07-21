@@ -273,12 +273,10 @@ function generate() {
   setBtn('genBtn','genSpin','genLabel',true,'Generating...');
   var apiUrl='http://data.classplus.co/api/queries/'+encodeURIComponent(queryId)+'/results.csv?api_key='+encodeURIComponent(apiKey);
   var date=new Date().toISOString().slice(0,10);
-  var playStoreUrl=v('f_playStore');
   var code=TEMPLATE
     .replace(/{{ORG_NAME}}/g, orgName)
     .replace(/{{ORG_ID}}/g,   orgId)
     .replace(/{{ORG_CODE}}/g, orgCode)
-    .replace(/{{APP_URL}}/g,  appUrl)
     .replace(/{{PLAY_STORE_URL}}/g, playStoreUrl)
     .replace(/{{SHEET_ID}}/g, sheetId)
     .replace(/{{COLOR}}/g,    '#4f6ef7')
