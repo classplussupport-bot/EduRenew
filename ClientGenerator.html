@@ -157,6 +157,24 @@ tr:hover td{background:rgba(79,110,247,.03)}
       <div class="code-area" id="codeOut"></div>
     </div>
 
+    <!-- appsscript.json section -->
+    <div class="out-card" id="manifestCard" style="display:none;margin-top:16px">
+      <div class="out-header">
+        <span class="out-label">appsscript.json &mdash; paste this in Apps Script manifest file</span>
+        <button class="copy-btn" onclick="copyManifest()">Copy</button>
+      </div>
+      <pre id="manifestOut" style="padding:16px;font-size:12px;color:#a0a0cc;overflow-x:auto;white-space:pre;background:#080812;border-radius:0 0 10px 10px;margin:0">{
+  "timeZone": "Asia/Kolkata",
+  "dependencies": {},
+  "exceptionLogging": "STACKDRIVER",
+  "runtimeVersion": "V8",
+  "urlFetchWhitelist": [
+    "https://*.courses.store/",
+    "https://*.on-app.in/"
+  ]
+}</pre>
+    </div>
+
     <div class="url-grid" id="urlGrid" style="display:none">
       <div class="url-box">
         <div class="url-label">&#128274; Tutor / Admin</div>
@@ -281,6 +299,7 @@ function generate() {
   setBtn('genBtn','genSpin','genLabel',false,'&#9654; Generate Code.gs');
   showStatus('genStatus','ok','&#10003; Code.gs generated for <strong>'+esc(orgName)+'</strong>. Copy it, paste into Apps Script, deploy, then paste the URL below.');
   document.getElementById('codeOut').textContent=code;
+  document.getElementById('manifestCard').style.display='block';
   document.getElementById('output').style.display='block';
   document.getElementById('urlGrid').style.display='none';
   document.getElementById('output').scrollIntoView({behavior:'smooth',block:'start'});
@@ -320,6 +339,13 @@ function saveClient() {
     showStatus('saveStatus','ok','&#10003; <strong>'+esc(_genData.orgName)+'</strong> registered! Check <strong>All Clients</strong> tab to verify.');
     _allClients=[];
   },1000);
+}
+
+function copyManifest() {
+  var txt = document.getElementById('manifestOut').textContent;
+  navigator.clipboard.writeText(txt).then(function() {
+    showStatus('genStatus','ok','appsscript.json copied!');
+  });
 }
 
 function copyCode() {
